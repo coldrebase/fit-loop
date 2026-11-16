@@ -106,6 +106,22 @@ android.permission.health.READ_RESTING_HEART_RATE
 
 链路由 `src/lib/visionClient.ts` 实现；未配置密钥时仍显示「未接入」，不会假装识别成功。
 
+
+### 4) 离线粗识别（无密钥时的兜底）
+
+APK 内置 MobileNetV1（ImageNet 1000 类，量化版 4.1MB，Task Library 从 metadata 读标签）：
+
+- 完全离线、零成本，不发任何请求
+- 只把 ImageNet 里的几十种食物标签映射成中文（香蕉/苹果/西兰花/披萨/汉堡/寿司/咖啡…）
+- 非食物标签或本地食物库没有的，直接返回「没认出来」，不猜
+- 界面上明确标注「离线模式 · 粗分类」，并追加一条局限性说明
+
+实现：`FoodClassifierPlugin.kt`（Bitmap → TensorImage → ImageClassifier），
+标签映射在 `src/lib/offlineFood.ts`。
+
+**体积代价**：TFLite 原生库较大，因此限制 `abiFilters 'arm64-v8a','armeabi-v7a'`，
+APK 从 ~36MB 降到 ~20MB（只装真机，不含模拟器架构）。
+
 ## 后续可加的原生能力
 
 - **Health Connect 读取**：`androidx.health.connect` + 权限声明 + 原生插件，可直接读体重/睡眠

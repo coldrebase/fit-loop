@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         // Custom plugins must be registered before super.onCreate
         registerPlugin(HealthConnectPlugin.class);
+        registerPlugin(FoodClassifierPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

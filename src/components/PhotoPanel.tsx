@@ -8,6 +8,7 @@ import { COOKING_LABEL, suggestOilG } from "@/lib/nutrition";
 import { searchLocalFoods } from "@/lib/repo";
 import type { CookingMethod, Food, FoodEntry, MealSlot, VisionResult } from "@/lib/types";
 import { analyzePhoto, getVisionConfig, hasVisionConfig } from "@/lib/visionClient";
+import { classifyOffline, offlineClassifierSupported } from "@/lib/offlineFood";
 import { cx, uid } from "@/lib/utils";
 
 const METHODS: CookingMethod[] = [
@@ -21,6 +22,13 @@ const METHODS: CookingMethod[] = [
   "roasted",
   "air_fryer",
   "other",
+];
+
+const OFFLINE_LIMITATIONS = [
+  "照片无法可靠判断食物重量，必须由你自己估计或称量份量。",
+  "看不到隐藏配料（调味汁、糖、油、酱料），需要你手动补充。",
+  "识别结果只是候选，可能有误；请确认后再入账。",
+  "热量为区间估算，不是精确值。",
 ];
 
 /** 与 /api/vision/analyze 的体积上限保持一致 */
@@ -134,7 +142,31 @@ export function PhotoPanel({
         setResult(await analyzePhoto(file));
         return;
       }
-      // 2) 静态部署且未配置：明确「未接入」，不发必然 404 的请求
+      // 2) 没配密钥时，原生 App 尝试本地离线模型（ImageNet 粗分类）
+      if (offlineClassifierSupported()) {
+        const off = await classifyOffline(file);
+        if (off.supported && off.candidates.length > 0) {
+          const named = off.candidates.filter((c) => c.chinese);
+          setResult({
+            status: named.length ? "ok" : "not_found",
+            message: named.length
+              ? undefined
+              : "离线模型认出了物体，但不在内置食物库里，请手动记录。",
+            candidates: named.map((c) => ({
+              name: c.chinese as string,
+              confidence: c.score,
+            })),
+            limitations: [
+              ...OFFLINE_LIMITATIONS,
+              "离线模式：使用内置 ImageNet 粗分类模型，只认几十种常见食材（西式为主），中文菜系基本识别不了。",
+            ],
+            provider: "offline-mobilenet",
+            queriedAt: new Date().toISOString(),
+          });
+          return;
+        }
+      }
+      // 3) 静态部署且未配置：明确「未接入」，不发必然 404 的请求
       if (process.env.NEXT_PUBLIC_STATIC_DEPLOY === "1") {
         setResult({ status: "not_configured", limitations: [] });
         return;
