@@ -1,0 +1,38 @@
+<view class="page" wx:if="{{ready}}">
+  <view class="card" wx:if="{{finished}}">
+    <view class="ttl">本次训练</view>
+    <view class="big-value">{{doneSets}}</view>
+    <view class="sub">完成组数</view>
+    <button class="btn-primary mt" bindtap="finish">保存并结束</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="sub">{{title}}</view>
+      <view class="ttl mt-s">{{exName}}</view>
+      <view class="sub">第 {{exIndex + 1}}/{{exTotal}} 个动作 · 第 {{setIndex + 1}}/{{setTotal}} 组</view>
+    </view>
+
+    <view class="card">
+      <block wx:if="{{isTimed}}">
+        <view class="lbl">时长（秒）</view>
+        <input class="inp" type="number" value="{{duration}}" bindinput="onDuration" />
+      </block>
+      <block wx:else>
+        <view class="lbl">重量（kg）</view>
+        <input class="inp" type="number" value="{{weight}}" bindinput="onWeight" />
+        <view class="lbl">次数</view>
+        <input class="inp" type="number" value="{{reps}}" bindinput="onReps" />
+      </block>
+
+      <view class="lbl">主观难度 RPE</view>
+      <view class="rpe">
+        <view wx:for="{{[1,2,3,4,5,6,7,8,9,10]}}" wx:key="*this" class="rpe-item {{rpe === item ? 'on' : ''}}" data-v="{{item}}" bindtap="setRpe">{{item}}</view>
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="completeSet">完成本组</button>
+    <button class="btn-secondary mt" bindtap="skipSet">跳过本组</button>
+    <button class="btn-secondary mt" bindtap="finish">提前结束训练</button>
+  </block>
+</view>

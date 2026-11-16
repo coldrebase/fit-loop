@@ -1,0 +1,61 @@
+<view class="page">
+  <view class="card">
+    <view class="row-between">
+      <view class="ttl">我的档案</view>
+      <view class="link" bindtap="openEdit">编辑</view>
+    </view>
+    <view class="sub mt-s">{{goal}} · {{level}} · 每周 {{daysPerWeek}} 次 · 每次 {{sessionMinutes}} 分钟</view>
+    <view class="sub">{{heightCm}}cm / {{weightKg}}kg</view>
+    <view class="sub mt-s">每日目标：{{targetText}}</view>
+  </view>
+
+  <view class="card">
+    <view class="row-between">
+      <view class="ttl">外观</view>
+      <view class="sub">{{theme === 'dark' ? '夜间模式' : '日间模式'}}</view>
+    </view>
+    <button class="btn-secondary mt" bindtap="toggleTheme">{{theme === 'dark' ? '切换到日间' : '切换到夜间'}}</button>
+  </view>
+
+  <view class="card">
+    <view class="ttl">计算依据</view>
+    <view class="sub mt-s">{{basis}}</view>
+  </view>
+
+  <view class="section-title">数据</view>
+  <view class="card">
+    <button class="btn-secondary" bindtap="exportData">复制数据（JSON）到剪贴板</button>
+    <button class="btn-secondary mt" bindtap="wipe" style="color: var(--alert)">删除全部个人数据</button>
+    <view class="sub mt-s">数据保存在本机小程序存储中，不上传服务器。换设备不会自动同步。</view>
+  </view>
+
+  <!-- 编辑档案 -->
+  <view class="mask" wx:if="{{editing}}" bindtap="closeEdit"></view>
+  <view class="sheet" wx:if="{{editing}}">
+    <view class="row-between">
+      <view class="ttl">编辑档案</view>
+      <view class="link" bindtap="closeEdit">关闭</view>
+    </view>
+
+    <view class="lbl">训练目标</view>
+    <view class="chips">
+      <view wx:for="{{goalOptions}}" wx:key="value" class="chip {{goal === item.label ? 'on' : ''}}" data-value="{{item.value}}" bindtap="pickGoal">{{item.label}}</view>
+    </view>
+
+    <view class="lbl mt-s">经验</view>
+    <view class="chips">
+      <view wx:for="{{levelOptions}}" wx:key="value" class="chip {{level === item.label ? 'on' : ''}}" data-value="{{item.value}}" bindtap="pickLevel">{{item.label}}</view>
+    </view>
+
+    <view class="lbl mt-s">每周训练天数</view>
+    <input class="inp" type="number" value="{{daysPerWeek}}" bindinput="onDays" />
+    <view class="lbl">单次时长（分钟）</view>
+    <input class="inp" type="number" value="{{sessionMinutes}}" bindinput="onMinutes" />
+    <view class="lbl">身高（cm）</view>
+    <input class="inp" type="number" value="{{heightCm}}" bindinput="onHeight" />
+    <view class="lbl">体重（kg）</view>
+    <input class="inp" type="number" value="{{weightKg}}" bindinput="onWeight" />
+
+    <button class="btn-primary mt" bindtap="saveEdit">保存</button>
+  </view>
+</view>

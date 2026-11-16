@@ -1,0 +1,45 @@
+<view class="page">
+  <view class="card">
+    <view class="section-title" style="margin-top:0">本周复盘</view>
+    <view class="big-value">{{rate === null ? "—" : rate}}<text class="unit">%</text></view>
+    <view class="sub">训练完成</view>
+    <view class="sub mt-s">{{rateText}}</view>
+  </view>
+
+  <view class="card">
+    <view class="row-between">
+      <view class="ttl">容量</view>
+      <view class="sub">{{volumes}} kg</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="ttl">饮食</view>
+    <view class="sub mt-s">{{nutrition.note}}</view>
+    <view class="sub" wx:if="{{nutrition.avgKcal !== null}}">平均 {{nutrition.avgKcal}} kcal · 蛋白 {{nutrition.avgProtein}}g · 达标 {{nutrition.proteinHitDays}} 天</view>
+  </view>
+
+  <view class="card">
+    <view class="ttl">体重</view>
+    <view class="sub mt-s">{{weight.note}}</view>
+    <view class="sub" wx:if="{{weight.changeKg !== null}}">本周变化 {{weight.changeKg}} kg</view>
+  </view>
+
+  <view class="card">
+    <view class="ttl">恢复</view>
+    <view class="sub mt-s">{{recovery.note}}</view>
+  </view>
+
+  <view class="card" wx:if="{{cautions.length > 0}}">
+    <view class="ttl" style="color: var(--clay)">需要注意</view>
+    <view class="sub mt-s" wx:for="{{cautions}}" wx:key="*this">· {{item}}</view>
+  </view>
+
+  <view class="section-title">训练记录</view>
+  <view class="card" wx:for="{{sessions}}" wx:key="id">
+    <view class="row-between">
+      <view>{{item.title}}</view>
+      <view class="sub">{{item.when}} · {{item.status}}</view>
+    </view>
+  </view>
+</view>

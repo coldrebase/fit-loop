@@ -1,0 +1,32 @@
+<view class="page">
+  <view class="card" wx:if="{{!hasPlan}}">
+    <view class="ttl">还没有训练计划</view>
+    <view class="sub">根据档案与「{{venueName}}」的器械生成一份可编辑的计划。</view>
+    <button class="btn-primary mt" bindtap="generate">生成计划</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="row-between">
+        <view class="ttl">{{planName}}</view>
+        <view class="sub">{{venueName}}</view>
+      </view>
+      <view class="sub rationale">{{rationale}}</view>
+      <button class="btn-secondary mt" bindtap="generate">按档案重新生成</button>
+      <button class="btn-primary mt" wx:if="{{inProgressId}}" bindtap="resume">继续未结束的训练</button>
+    </view>
+
+    <view class="section-title">训练日</view>
+    <view class="card" wx:for="{{days}}" wx:key="id">
+      <view class="row-between">
+        <view class="ttl">{{item.title}}</view>
+        <view class="sub">{{item.meta}}</view>
+      </view>
+      <view class="ex" wx:for="{{item.items}}" wx:for-item="ex" wx:key="id">
+        <view class="ex-name">{{ex.name}}</view>
+        <view class="sub">{{ex.sets}} 组 × {{ex.reps}} · 休息 {{ex.rest}}s</view>
+      </view>
+      <button class="btn-primary mt" data-id="{{item.id}}" bindtap="start">开始训练</button>
+    </view>
+  </block>
+</view>

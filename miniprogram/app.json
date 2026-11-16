@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/train/index",
+    "pages/diet/index",
+    "pages/progress/index",
+    "pages/me/index",
+    "pages/run/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "FitLoop",
+    "navigationBarBackgroundColor": "#FBF9F6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FBF9F6"
+  },
+  "tabBar": {
+    "color": "#6B6B73",
+    "selectedColor": "#3F7867",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "今日"
+      },
+      {
+        "pagePath": "pages/train/index",
+        "text": "训练"
+      },
+      {
+        "pagePath": "pages/diet/index",
+        "text": "饮食"
+      },
+      {
+        "pagePath": "pages/progress/index",
+        "text": "进展"
+      },
+      {
+        "pagePath": "pages/me/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
