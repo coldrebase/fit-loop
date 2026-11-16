@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ExerciseFigure } from "./ExerciseFigure";
+import { ExerciseThumb } from "./ExerciseVideoLink";
 import { DIFFICULTY_LABEL, ExerciseLibrary } from "./ExerciseViews";
 import { Chip, Modal, Sheet, Stepper, toast } from "./ui";
 import { EQUIPMENT_LABEL, MOVEMENT_PATTERN_LABEL, equipmentOf, estimateDayMinutes, findSubstitutes, slimForTime } from "@/lib/plan/engine";
@@ -135,9 +135,7 @@ export function PlanEditor({
           return (
             <div key={item.id} className={cx("card-tight", blocked && "border-clay-500/50 bg-clay-50/40")}>
               <div className="flex items-start gap-3">
-                <div className="h-14 w-12 shrink-0 rounded-lg bg-paper">
-                  <ExerciseFigure pattern={ex.movementPattern} className="h-full w-full" />
-                </div>
+                <ExerciseThumb size="sm" className="rounded-lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-[14.5px] font-medium">{ex.name}</span>
@@ -444,9 +442,7 @@ function SwapPlanSheet({
             onClick={() => onPick(exercise.id, currentId)}
             className="flex w-full items-center gap-3 py-2.5 text-left"
           >
-            <div className="h-14 w-12 shrink-0 rounded-lg border border-paper-line bg-paper">
-              <ExerciseFigure pattern={exercise.movementPattern} className="h-full w-full" />
-            </div>
+            <ExerciseThumb size="sm" />
             <div className="min-w-0 flex-1">
               <div className="text-[14.5px] font-medium">{exercise.name}</div>
               <div className="truncate text-[12px] text-ink-faint">

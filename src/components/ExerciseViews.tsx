@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ExerciseFigure } from "./ExerciseFigure";
+import { DEMO_COACH, ExerciseThumb, ExerciseVideoLink, douyinSearchUrl } from "./ExerciseVideoLink";
 import { Chip, Empty, Modal, Sheet } from "./ui";
 import { EQUIPMENT_LABEL, MOVEMENT_PATTERN_LABEL, equipmentAvailable, equipmentOf } from "@/lib/plan/engine";
 import { MUSCLES, REGION_LABEL, muscleName } from "@/lib/seed/muscles";
@@ -36,9 +36,7 @@ export function ExerciseDetail({
     <Modal open={open} onClose={onClose} title={ex.name} footer={footer}>
       <div className="space-y-4">
         <div className="flex gap-3">
-          <div className="h-28 w-24 shrink-0 rounded-xl border border-paper-line bg-paper">
-            <ExerciseFigure pattern={ex.movementPattern} className="h-full w-full p-1" />
-          </div>
+          <ExerciseVideoLink exerciseName={ex.name} size="lg" />
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex flex-wrap gap-1">
               <Chip>{MOVEMENT_PATTERN_LABEL[ex.movementPattern]}</Chip>
@@ -63,8 +61,18 @@ export function ExerciseDetail({
         </div>
 
         <div className="rounded-xl border border-paper-line bg-paper px-3 py-2 text-[12px] leading-relaxed text-ink-faint">
-          图示为<span className="text-ink-soft">本地绘制的示意简图</span>，仅用于说明动作模式与关节位置，不是真人演示，也不代表专业审核。
-          {ex.media.kind === "illustration" ? `（${ex.media.note}）` : ""}
+          演示视频：点左上角
+          <span className="text-ink-soft">▶ 抖音</span>
+          在抖音搜索<span className="text-ink-soft">「{DEMO_COACH} {ex.name}」</span>观看。
+          <a
+            href={douyinSearchUrl(ex.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 font-medium text-moss-700 underline"
+          >
+            直接打开 ↗
+          </a>
+          <div className="mt-1">视频为第三方内容，动作要点以本页文字说明与你自身感受为准。</div>
         </div>
 
         <section>
@@ -299,9 +307,7 @@ export function ExerciseRow({
   return (
     <div className="flex items-center gap-3 py-2.5">
       <button onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-        <div className="h-14 w-12 shrink-0 rounded-lg border border-paper-line bg-paper">
-          <ExerciseFigure pattern={ex.movementPattern} className="h-full w-full" />
-        </div>
+        <ExerciseThumb size="sm" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="truncate text-[14.5px] font-medium">{ex.name}</span>

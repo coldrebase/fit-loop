@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ExerciseFigure } from "./ExerciseFigure";
+import { ExerciseThumb, ExerciseVideoLink, DEMO_COACH, douyinSearchUrl } from "./ExerciseVideoLink";
 import { Confirm, Modal, Stepper, toast } from "./ui";
 import { DIFFICULTY_LABEL } from "./ExerciseViews";
 import { useApp } from "./AppProvider";
@@ -509,9 +509,7 @@ export function WorkoutRunner({
 
       {/* 动作概览 */}
       <div className="card-tight mb-3 flex gap-3">
-        <button className="h-20 w-16 shrink-0 rounded-lg bg-paper" onClick={() => setShowRef(true)}>
-          <ExerciseFigure pattern={ex.movementPattern} className="h-full w-full" />
-        </button>
+        <ExerciseVideoLink exerciseName={ex.name} size="md" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="truncate text-[15px] font-semibold">{ex.name}</span>
@@ -667,6 +665,15 @@ export function WorkoutRunner({
               {ex.safetyNote}
             </div>
           )}
+          <a
+            href={douyinSearchUrl(ex.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1 rounded-xl border border-moss-600/20 bg-moss-50 px-3 py-2.5 text-[13.5px] font-medium text-moss-700"
+          >
+            <span aria-hidden="true">▶</span>
+            在抖音看「{DEMO_COACH} {ex.name}」的演示
+          </a>
         </div>
       </Modal>
 
@@ -803,9 +810,7 @@ function SwapSheet({
             onClick={() => onPick(exercise.id)}
             className="flex w-full items-center gap-3 py-2.5 text-left"
           >
-            <div className="h-14 w-12 shrink-0 rounded-lg border border-paper-line bg-paper">
-              <ExerciseFigure pattern={exercise.movementPattern} className="h-full w-full" />
-            </div>
+            <ExerciseThumb size="sm" />
             <div className="min-w-0 flex-1">
               <div className="text-[14.5px] font-medium">{exercise.name}</div>
               <div className="truncate text-[12px] text-ink-faint">
