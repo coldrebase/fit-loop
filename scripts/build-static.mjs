@@ -12,7 +12,7 @@
  *   node scripts/build-static.mjs --base=/fit-loop
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync, cpSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,6 +93,46 @@ if (!existsSync(outDir)) {
 // GitHub Pages 默认走 Jekyll，会忽略 `_next` 这类下划线开头的目录 → 必须关掉。
 writeFileSync(join(outDir, ".nojekyll"), "");
 log("已写入 out/.nojekyll");
+
+/**
+ * 注入 iOS 启动图（apple-touch-startup-image）。
+ * Next 的 metadata 不支持这类 link，所以在导出后统一插到每个 html 的 </head> 前。
+ */
+const SPLASH = [
+  ["750x1334", "375", "667", 2],
+  ["828x1792", "414", "896", 2],
+  ["1125x2436", "375", "812", 3],
+  ["1170x2532", "390", "844", 3],
+  ["1179x2556", "393", "852", 3],
+  ["1242x2688", "414", "896", 3],
+  ["1284x2778", "428", "926", 3],
+  ["1290x2796", "430", "932", 3],
+];
+
+const splashLinks = SPLASH.map(
+  ([file, w, h, dpr]) =>
+    `<link rel="apple-touch-startup-image" href="${basePath}/splash/${file}.png" media="(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${dpr}) and (orientation: portrait)"/>`,
+).join("");
+
+const htmlFiles = [];
+const walk = (dir) => {
+  for (const name of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, name.name);
+    if (name.isDirectory()) walk(p);
+    else if (name.name.endsWith(".html")) htmlFiles.push(p);
+  }
+};
+walk(outDir);
+
+let injected = 0;
+for (const file of htmlFiles) {
+  const html = readFileSync(file, "utf8");
+  if (html.includes("apple-touch-startup-image")) continue;
+  if (!html.includes("</head>")) continue;
+  writeFileSync(file, html.replace("</head>", `${splashLinks}</head>`), "utf8");
+  injected += 1;
+}
+log(`已注入 iOS 启动图链接：${injected}/${htmlFiles.length} 个页面`);
 
 // GitHub Pages 对未知路径返回 404.html；Next 静态导出已生成，这里确认存在。
 if (!existsSync(join(outDir, "404.html"))) {

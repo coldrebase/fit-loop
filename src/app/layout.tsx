@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppProvider } from "@/components/AppProvider";
+import { BootSplashClear } from "@/components/BootSplashClear";
 import { BottomNav } from "@/components/BottomNav";
+import { InstallHint } from "@/components/InstallHint";
 import { PwaBoot } from "@/components/PwaBoot";
 import { ThemeBoot } from "@/components/ThemeBoot";
 import { ToastHost } from "@/components/ui";
@@ -12,6 +14,9 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const TITLE = "FitLoop · 训练与饮食记录";
 const DESC =
   "学习动作、制定计划、执行训练、管理饮食、复盘调整的移动端优先健身管理应用（本地优先，数据保存在你的浏览器）。";
+
+/** 在首帧渲染前应用主题，避免深色用户看到白色闪烁 */
+const THEME_BOOT = `try{var m=localStorage.getItem("fitloop-mode");if(m==="dark"){document.documentElement.dataset.theme="dark";}}catch(e){}`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -54,15 +59,43 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body>
+        {/* 首帧前定主题，避免深色模式白闪 */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+
+        {/* 首屏启动图：纯内联样式，JS 未加载也不会白屏 */}
+        <div
+          id="boot-splash"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#0A0C0E",
+            transition: "opacity .3s ease",
+          }}
+          aria-hidden="true"
+        >
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+            <circle cx="48" cy="48" r="6" fill="#C6F24E" />
+            <rect x="20" y="42" width="56" height="12" rx="6" fill="#C6F24E" />
+            <rect x="8" y="26" width="12" height="44" rx="4" fill="#C6F24E" />
+            <rect x="76" y="26" width="12" height="44" rx="4" fill="#C6F24E" />
+          </svg>
+        </div>
+
         <ThemeBoot />
+        <BootSplashClear />
         <PwaBoot />
         <AppProvider>
           <div className="mx-auto flex min-h-screen w-full max-w-[560px] flex-col bg-paper">
             <main className="flex-1 pb-24">{children}</main>
             <BottomNav />
           </div>
+          <InstallHint />
           <ToastHost />
         </AppProvider>
       </body>
