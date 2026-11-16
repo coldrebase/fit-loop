@@ -203,7 +203,7 @@ NODE_OPTIONS="" npx next build      # 收尾清理不被拦截，构建正常退
 
 ## 部署（GitHub Pages，静态版）
 
-线上地址：<https://yunhao1438-oss.github.io/fit-loop/>
+线上地址：<https://coldrebase.github.io/fit-loop/>
 
 ### 自动发布（日常用这个）
 
@@ -247,6 +247,6 @@ git push origin v0.1.0
 
 流程见 `.github/workflows/release.yml`：`npm ci` → `tsc` → 单测 → 静态导出 →
 打包 `fitloop-static-<tag>.zip` → `gh release create`（Release notes 由 `--generate-notes`
-按提交历史自动生成，也可在页面上手改）。发布页：<https://github.com/yunhao1438-oss/fit-loop/releases>
+按提交历史自动生成，也可在页面上手改）。发布页：<https://github.com/coldrebase/fit-loop/releases>
 
 > 注意：tag 必须是 `v` 开头（如 `v0.2.0`），否则不会触发；发布不会影响已上线的 Pages 站点。
