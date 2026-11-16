@@ -13,7 +13,9 @@
     "test:build": "node tests/build.mjs",
     "build:static": "node scripts/build-static.mjs",
     "deploy:pages": "node scripts/deploy-pages.mjs",
-    "build:mp": "node scripts/build-mp.mjs"
+    "build:mp": "node scripts/build-mp.mjs",
+    "set-mp-appid": "node scripts/set-mp-appid.mjs",
+    "upload:mp": "node scripts/upload-mp.mjs"
   },
   "dependencies": {
     "idb": "^8.0.0",

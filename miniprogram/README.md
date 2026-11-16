@@ -48,6 +48,45 @@ npm run build:mp      # = node scripts/build-mp.mjs
 
 当前 AppID：`wxe45889553e945b30`（在 `project.config.json` 里，可自行替换）。
 
+
+## 接入正式 AppID（发布前必做）
+
+当前 `project.config.json` 里的 AppID 是**测试号**（`wxe45889553e945b30`）。测试号不能上传发布、没有版本管理，只能本机预览。
+
+### 1. 注册正式小程序
+
+https://mp.weixin.qq.com → 立即注册 → 小程序
+
+- 邮箱必须**未注册过**公众号/小程序
+- 个人主体：身份证 + 微信实名（免费）
+- 类目建议：健康 → 健康管理；或 工具 → 效率
+- 注册完成后在「开发 → 开发管理 → 开发设置」拿到 **AppID**
+
+### 2. 切换 AppID 并上传
+
+```bash
+# 改仓库内工程 + IDE 里那份工程
+npm run set-mp-appid -- wx1234567890abcdef --dir "C:\Users\yh\WeChatProjects\fitloop-mini"
+
+# 重新打开工程（IDE 里关掉再打开，或）
+& "E:\netase\wkf\微信web开发者工具\cli.bat" open --project "C:\Users\yh\WeChatProjects\fitloop-mini"
+
+# 上传开发版
+npm run upload:mp -- -v 0.1.0 -d "首个版本" --dir "C:\Users\yh\WeChatProjects\fitloop-mini"
+```
+
+### 3. 设为体验版 / 提交审核
+
+mp.weixin.qq.com → 管理 → **版本管理** → 开发版本 → 选为体验版（加体验成员扫码）
+确认无误后 → 提交审核 → 审核通过后发布。
+
+### 审核前检查
+
+- [ ] 已填「设置 → 基本设置 → 服务类目」
+- [ ] 已填「设置 → 服务内容声明 → 用户隐私保护指引」（本地存储，不上传服务器）
+- [ ] 小程序名称不含「FitLoop」以外的品牌词，不与已有名称冲突
+- [ ] 若声明健康类功能，个人主体可能被要求补充资质，必要时改为「工具-效率」描述
+
 ## 与网页版的差异
 
 | 能力 | 网页版 | 小程序版 |
