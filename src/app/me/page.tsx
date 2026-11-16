@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
 import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
@@ -56,6 +57,7 @@ const DEFAULT_DIET: DietProfile = {
 };
 
 export default function MePage() {
+  const router = useRouter();
   const {
     ready,
     profile,
@@ -253,7 +255,21 @@ export default function MePage() {
         </div>
       </div>
 
+      {/* 健康数据导入 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[15px] font-medium">健康数据</span>
+          <button className="text-[12px] text-moss-600 underline" onClick={() => router.push("/import")}>
+            导入
+          </button>
+        </div>
+        <div className="text-[12.5px] leading-relaxed text-ink-soft">
+          从 Apple 健康 / Health Connect 导出后导入，自动补上体重与睡眠记录。浏览器无法直接读系统健康数据。
+        </div>
+      </div>
+
       {/* 安装到手机 */}
+
       <div className="card">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[15px] font-medium">安装到手机</span>

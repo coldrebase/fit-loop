@@ -9,7 +9,7 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/build.mjs && node --test tests/plan.test.mjs tests/nutrition.test.mjs",
+    "test": "node tests/build.mjs && node --test tests/plan.test.mjs tests/nutrition.test.mjs tests/health.test.mjs",
     "test:build": "node tests/build.mjs",
     "build:static": "node scripts/build-static.mjs",
     "deploy:pages": "node scripts/deploy-pages.mjs",
