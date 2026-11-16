@@ -1,0 +1,13 @@
+{
+  "appId": "app.fitloop.mobile",
+  "appName": "FitLoop",
+  "webDir": "out",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

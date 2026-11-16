@@ -25,3 +25,12 @@ Thumbs.db
 # pages deploy staging
 .pages-deploy/
 
+
+# Android / Capacitor 构建产物与签名
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+*.jks
+*.keystore
+keystore/
