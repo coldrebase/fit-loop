@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
 import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { notificationsSupported, syncReminders } from "@/lib/nativeNotify";
+import { VisionSettings } from "@/components/VisionSettings";
 import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
@@ -254,6 +255,15 @@ export default function MePage() {
         <div className="mt-1.5 text-[11.5px] text-ink-faint">
           夜间模式为深色背景，适合暗光环境。选择保存在本机，立即生效。
         </div>
+      </div>
+
+      {/* 拍照识别服务 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[15px] font-medium">识别服务</span>
+          <span className="text-[12px] text-ink-faint">拍照识别用</span>
+        </div>
+        <VisionSettings />
       </div>
 
       {/* 健康数据导入 */}

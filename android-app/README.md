@@ -90,6 +90,22 @@ android.permission.health.READ_RESTING_HEART_RATE
 - Health Connect 依赖为 `androidx.health.connect:connect-client:1.1.0-alpha07`（1.1.0 稳定版要求 AGP 8.9 + compileSdk 36，本工程是 AGP 8.2 + compileSdk 34）
 - Android 14+ 系统内置 Health Connect；Android 9–13 需从商店安装 Health Connect 应用
 
+
+### 3) 拍照识别食物热量
+
+「我的 → 识别服务」填入 **OpenAI 兼容**的 Base URL + 密钥 + 模型（密钥只存本机 localStorage）。
+
+之后在「饮食 → 拍照识别」：
+
+1. 勾选用途同意 → 拍照/选图（Android WebView 会打开相机或相册）
+2. App **直接**调用你配置的视觉模型（不走本应用服务器，静态版也没有服务器）
+3. 模型只返回候选食物名 + 热量区间 + 建议烹饪方式，非法烹饪方式会被丢弃
+4. 你在本地食物库里匹配份量 → 显示区间（如 140–269 kcal）→ 手动确认后才写入日志
+
+设计约束（沿用项目既有原则）：照片无法确定重量与配料，因此**只给区间、不自动写入、不伪造精确值**。
+
+链路由 `src/lib/visionClient.ts` 实现；未配置密钥时仍显示「未接入」，不会假装识别成功。
+
 ## 后续可加的原生能力
 
 - **Health Connect 读取**：`androidx.health.connect` + 权限声明 + 原生插件，可直接读体重/睡眠

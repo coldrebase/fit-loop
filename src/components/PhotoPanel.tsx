@@ -7,6 +7,7 @@ import { defaultCookingFor } from "./FoodAdder";
 import { COOKING_LABEL, suggestOilG } from "@/lib/nutrition";
 import { searchLocalFoods } from "@/lib/repo";
 import type { CookingMethod, Food, FoodEntry, MealSlot, VisionResult } from "@/lib/types";
+import { analyzePhoto, getVisionConfig, hasVisionConfig } from "@/lib/visionClient";
 import { cx, uid } from "@/lib/utils";
 
 const METHODS: CookingMethod[] = [
@@ -125,14 +126,20 @@ export function PhotoPanel({
 
   async function analyze() {
     if (!file) return;
-    // 静态部署没有服务端识别代理：保留既有「未接入」提示，不发起必然 404 的请求。
-    if (process.env.NEXT_PUBLIC_STATIC_DEPLOY === "1") {
-      setResult({ status: "not_configured", limitations: [] });
-      return;
-    }
     setLoading(true);
     setResult(null);
     try {
+      // 1) 本机配置了识别服务：App 内直连视觉模型（密钥只存本机）
+      if (hasVisionConfig()) {
+        setResult(await analyzePhoto(file));
+        return;
+      }
+      // 2) 静态部署且未配置：明确「未接入」，不发必然 404 的请求
+      if (process.env.NEXT_PUBLIC_STATIC_DEPLOY === "1") {
+        setResult({ status: "not_configured", limitations: [] });
+        return;
+      }
+      // 3) 自托管 / Vercel：走既有的服务端代理
       const fd = new FormData();
       fd.append("image", file);
       const res = await fetch("/api/vision/analyze", { method: "POST", body: fd });
@@ -229,13 +236,27 @@ export function PhotoPanel({
           </div>
         )}
 
+        {hasVisionConfig() && (
+          <div className="text-[11.5px] text-ink-faint">
+            当前使用：{getVisionConfig().model}（在「我的 → 识别服务」可改）
+          </div>
+        )}
+
         {file && (
           <button className="btn-primary w-full" onClick={() => void analyze()} disabled={loading}>
             {loading ? "识别中…" : "开始识别"}
           </button>
         )}
 
-        {result?.status === "not_configured" && <NotConfigured what="拍照识别" />}
+        {result?.status === "not_configured" && (
+          <>
+            <NotConfigured what="拍照识别" />
+            <div className="text-[11.5px] leading-relaxed text-ink-faint">
+              想让照片自动给候选食物：到「我的 → 识别服务」填入 API 地址与密钥（只保存在本机），
+              之后这里会直接调用你配置的视觉模型。
+            </div>
+          </>
+        )}
         {result?.status === "error" && (
           <div className="rounded-xl border border-alert/25 bg-alert/5 px-3 py-2.5 text-[13px] text-alert">
             {result.message}
