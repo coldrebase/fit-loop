@@ -19,6 +19,9 @@ export const THEMES = [
   "dark-orange",
   "dark-purple",
   "soft",
+  "cream",
+  "mint",
+  "night",
 ] as const;
 
 export type ThemeName = (typeof THEMES)[number];
@@ -28,9 +31,12 @@ const MODE_KEY = "fitloop-mode";
 const EVENT = "fitloop-theme-change";
 
 const META_COLOR: Record<ThemeMode, string> = {
-  light: "#FBF9F6",
+  light: "#ECFAF6",
   dark: "#0A0C0E",
 };
+
+/** 日间默认用「薄荷小熊」主题 */
+export const LIGHT_THEME = "mint";
 
 function isTheme(v: string | null | undefined): v is ThemeName {
   return !!v && (THEMES as readonly string[]).includes(v);
@@ -56,8 +62,7 @@ export function getMode(): ThemeMode {
 
 export function applyMode(mode: ThemeMode) {
   const root = document.documentElement;
-  if (mode === "dark") root.dataset.theme = "dark";
-  else delete root.dataset.theme;
+  root.dataset.theme = mode === "dark" ? "dark" : LIGHT_THEME;
 
   try {
     localStorage.setItem(MODE_KEY, mode);

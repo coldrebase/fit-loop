@@ -41,6 +41,100 @@
   --shadow-lift: 0 8px 28px rgba(38, 38, 42, 0.1);
 }
 
+
+/* ===== 可爱版 A · 奶油布丁（粉奶油 + 超大圆角） ===== */
+[data-theme="cream"] {
+  color-scheme: light;
+  --c-bg: 255 247 240;
+  --c-card: 255 255 255;
+  --c-line: 250 226 212;
+  --c-ink: 74 54 46;
+  --c-ink-soft: 122 96 84;
+  --c-ink-faint: 158 132 118;
+  --c-accent-50: 255 240 246;
+  --c-accent-100: 255 219 232;
+  --c-accent-300: 255 168 196;
+  --c-accent-500: 246 118 162;
+  --c-accent-600: 232 88 140;
+  --c-accent-700: 190 60 112;
+  --c-clay-50: 255 243 232;
+  --c-clay-100: 255 226 200;
+  --c-clay-500: 249 156 96;
+  --c-clay-600: 208 110 58;
+  --c-alert: 196 74 84;
+  --c-warn: 168 108 20;
+  --c-on-accent: 255 255 255;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-xl2: 28px;
+  --r-2xl: 24px;
+  --r-3xl: 32px;
+  --shadow-soft: 0 6px 20px rgba(232, 88, 140, 0.10);
+  --shadow-lift: 0 14px 36px rgba(232, 88, 140, 0.18);
+}
+
+/* ===== 可爱版 B · 薄荷小熊（薄荷绿 + 大圆角） ===== */
+[data-theme="mint"] {
+  color-scheme: light;
+  --c-bg: 236 250 246;
+  --c-card: 255 255 255;
+  --c-line: 208 240 232;
+  --c-ink: 40 66 62;
+  --c-ink-soft: 82 112 106;
+  --c-ink-faint: 124 152 146;
+  --c-accent-50: 224 248 242;
+  --c-accent-100: 197 238 229;
+  --c-accent-300: 130 214 196;
+  --c-accent-500: 79 205 182;
+  --c-accent-600: 45 179 156;
+  --c-accent-700: 26 140 122;
+  --c-clay-50: 255 244 232;
+  --c-clay-100: 255 228 202;
+  --c-clay-500: 249 164 104;
+  --c-clay-600: 206 118 62;
+  --c-alert: 198 78 76;
+  --c-warn: 160 110 18;
+  --c-on-accent: 255 255 255;
+  --r-lg: 20px;
+  --r-xl: 24px;
+  --r-xl2: 30px;
+  --r-2xl: 26px;
+  --r-3xl: 34px;
+  --shadow-soft: 0 6px 20px rgba(45, 179, 156, 0.10);
+  --shadow-lift: 0 14px 36px rgba(45, 179, 156, 0.18);
+}
+
+/* ===== 可爱版 C · 夜空小狐（紫夜 + 蜜桃橙） ===== */
+[data-theme="night"] {
+  color-scheme: dark;
+  --c-bg: 32 28 48;
+  --c-card: 44 39 62;
+  --c-line: 68 61 94;
+  --c-ink: 246 240 255;
+  --c-ink-soft: 198 186 220;
+  --c-ink-faint: 152 140 178;
+  --c-accent-50: 58 45 60;
+  --c-accent-100: 78 60 76;
+  --c-accent-300: 184 124 112;
+  --c-accent-500: 255 176 138;
+  --c-accent-600: 255 155 110;
+  --c-accent-700: 255 205 178;
+  --c-clay-50: 60 44 52;
+  --c-clay-100: 80 60 66;
+  --c-clay-500: 245 170 120;
+  --c-clay-600: 252 200 160;
+  --c-alert: 255 150 150;
+  --c-warn: 250 205 120;
+  --c-on-accent: 32 22 26;
+  --r-lg: 18px;
+  --r-xl: 22px;
+  --r-xl2: 26px;
+  --r-2xl: 24px;
+  --r-3xl: 32px;
+  --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 14px 36px rgba(0, 0, 0, 0.45);
+}
+
 /* B · 极简编辑风：纯白底、近黑字、细线、几乎直角、无阴影、橙色点缀 */
 [data-theme="minimal"] {
   color-scheme: light;
@@ -358,4 +452,8 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+@keyframes pet-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }

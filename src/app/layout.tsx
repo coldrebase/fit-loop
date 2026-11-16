@@ -4,6 +4,7 @@ import { AppProvider } from "@/components/AppProvider";
 import { BootSplashClear } from "@/components/BootSplashClear";
 import { BottomNav } from "@/components/BottomNav";
 import { InstallHint } from "@/components/InstallHint";
+import { Mascot } from "@/components/Mascot";
 import { PwaBoot } from "@/components/PwaBoot";
 import { ThemeBoot } from "@/components/ThemeBoot";
 import { ToastHost } from "@/components/ui";
@@ -16,7 +17,7 @@ const DESC =
   "学习动作、制定计划、执行训练、管理饮食、复盘调整的移动端优先健身管理应用（本地优先，数据保存在你的浏览器）。";
 
 /** 在首帧渲染前应用主题，避免深色用户看到白色闪烁 */
-const THEME_BOOT = `try{var m=localStorage.getItem("fitloop-mode");if(m==="dark"){document.documentElement.dataset.theme="dark";}}catch(e){}`;
+const THEME_BOOT = `try{var m=localStorage.getItem("fitloop-mode");document.documentElement.dataset.theme=(m==="dark")?"dark":"mint";}catch(e){document.documentElement.dataset.theme="mint";}`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -52,7 +53,7 @@ export const viewport: Viewport = {
   // 否则 BottomNav/Sheet footer 用的 --safe-bottom 恒为 0，底部会被 Home Indicator 压住。
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FBF9F6" },
+    { media: "(prefers-color-scheme: light)", color: "#ECFAF6" },
     { media: "(prefers-color-scheme: dark)", color: "#0A0C0E" },
   ],
 };
@@ -74,16 +75,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#0A0C0E",
+            background: "#ECFAF6",
             transition: "opacity .3s ease",
           }}
           aria-hidden="true"
         >
           <svg width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-            <circle cx="48" cy="48" r="6" fill="#C6F24E" />
-            <rect x="20" y="42" width="56" height="12" rx="6" fill="#C6F24E" />
-            <rect x="8" y="26" width="12" height="44" rx="4" fill="#C6F24E" />
-            <rect x="76" y="26" width="12" height="44" rx="4" fill="#C6F24E" />
+            <circle cx="48" cy="48" r="6" fill="#2DB39C" />
+            <rect x="20" y="42" width="56" height="12" rx="6" fill="#2DB39C" />
+            <rect x="8" y="26" width="12" height="44" rx="4" fill="#2DB39C" />
+            <rect x="76" y="26" width="12" height="44" rx="4" fill="#2DB39C" />
           </svg>
         </div>
 
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1 pb-24">{children}</main>
             <BottomNav />
           </div>
+          <Mascot />
           <InstallHint />
           <ToastHost />
         </AppProvider>
