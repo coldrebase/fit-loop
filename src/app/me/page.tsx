@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "@/components/AppProvider";
+import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
@@ -72,12 +73,28 @@ export default function MePage() {
   } = useApp();
   const [editProfile, setEditProfile] = useState(false);
   const [mode, setMode] = useThemeMode();
+  const [installable, setInstallable] = useState(false);
+  const [standalone, setStandalone] = useState(false);
   const [editVenue, setEditVenue] = useState<Venue | null>(null);
   const [pendingDeleteVenue, setPendingDeleteVenue] = useState<Venue | null>(null);
   const [editDiet, setEditDiet] = useState(false);
   const [remindOpen, setRemindOpen] = useState(false);
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [confirmClearDemo, setConfirmClearDemo] = useState(false);
+  // 是否可一键安装（Chrome/Android 支持 beforeinstallprompt）
+  useEffect(() => {
+    const check = () => setInstallable(!!window.__fitloopInstallPrompt);
+    check();
+    window.addEventListener(INSTALLABLE_EVENT, check);
+    return () => window.removeEventListener(INSTALLABLE_EVENT, check);
+  }, []);
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    setStandalone(isStandalone);
+  }, []);
 
   if (!ready) return <Loading />;
 
@@ -236,7 +253,45 @@ export default function MePage() {
         </div>
       </div>
 
+      {/* 安装到手机 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[15px] font-medium">安装到手机</span>
+          <span className="text-[12px] text-ink-faint">{standalone ? "已安装" : "网页应用"}</span>
+        </div>
+        {standalone ? (
+          <div className="text-[12.5px] leading-relaxed text-ink-soft">
+            当前已以独立应用方式运行，断网也能打开。
+          </div>
+        ) : (
+          <>
+            <div className="text-[12.5px] leading-relaxed text-ink-soft">
+              <span className="text-ink">iPhone / iPad</span>：Safari 打开本页 → 底部「分享」→ 添加到主屏幕。
+              <br />
+              <span className="text-ink">Android</span>：Chrome 右上菜单 → 安装应用 / 添加到主屏幕。
+            </div>
+            {installable && (
+              <button
+                className="btn-secondary mt-2 w-full"
+                onClick={async () => {
+                  const r = await promptInstall();
+                  if (r === "accepted") toast("已开始安装", "ok");
+                  else if (r === "dismissed") toast("已取消安装", "info");
+                  else toast("请按上面的说明手动添加", "info");
+                }}
+              >
+                一键安装到桌面
+              </button>
+            )}
+            <div className="mt-1.5 text-[11.5px] text-ink-faint">
+              安装后像 App 一样全屏打开，数据仍只保存在本机。
+            </div>
+          </>
+        )}
+      </div>
+
       {/* 提醒 */}
+
       <div className="card">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[15px] font-medium">提醒</span>
@@ -364,7 +419,45 @@ export default function MePage() {
       {/* 饮食档案 */}
       <DietSheet open={editDiet} onClose={() => setEditDiet(false)} diet={diet} onSave={(d) => void saveDiet(d)} />
 
+      {/* 安装到手机 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[15px] font-medium">安装到手机</span>
+          <span className="text-[12px] text-ink-faint">{standalone ? "已安装" : "网页应用"}</span>
+        </div>
+        {standalone ? (
+          <div className="text-[12.5px] leading-relaxed text-ink-soft">
+            当前已以独立应用方式运行，断网也能打开。
+          </div>
+        ) : (
+          <>
+            <div className="text-[12.5px] leading-relaxed text-ink-soft">
+              <span className="text-ink">iPhone / iPad</span>：Safari 打开本页 → 底部「分享」→ 添加到主屏幕。
+              <br />
+              <span className="text-ink">Android</span>：Chrome 右上菜单 → 安装应用 / 添加到主屏幕。
+            </div>
+            {installable && (
+              <button
+                className="btn-secondary mt-2 w-full"
+                onClick={async () => {
+                  const r = await promptInstall();
+                  if (r === "accepted") toast("已开始安装", "ok");
+                  else if (r === "dismissed") toast("已取消安装", "info");
+                  else toast("请按上面的说明手动添加", "info");
+                }}
+              >
+                一键安装到桌面
+              </button>
+            )}
+            <div className="mt-1.5 text-[11.5px] text-ink-faint">
+              安装后像 App 一样全屏打开，数据仍只保存在本机。
+            </div>
+          </>
+        )}
+      </div>
+
       {/* 提醒 */}
+
       <RemindSheet
         open={remindOpen}
         onClose={() => setRemindOpen(false)}
