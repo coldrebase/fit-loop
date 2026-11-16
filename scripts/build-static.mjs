@@ -68,6 +68,8 @@ try {
         NEXT_STATIC_EXPORT: "1",
         NEXT_PUBLIC_STATIC_DEPLOY: "1",
         NEXT_BASE_PATH: basePath,
+        // 客户端也要知道前缀（manifest / service worker 注册路径）
+        NEXT_PUBLIC_BASE_PATH: basePath,
       },
     },
   );
