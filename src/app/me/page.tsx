@@ -419,43 +419,6 @@ export default function MePage() {
       {/* 饮食档案 */}
       <DietSheet open={editDiet} onClose={() => setEditDiet(false)} diet={diet} onSave={(d) => void saveDiet(d)} />
 
-      {/* 安装到手机 */}
-      <div className="card">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-[15px] font-medium">安装到手机</span>
-          <span className="text-[12px] text-ink-faint">{standalone ? "已安装" : "网页应用"}</span>
-        </div>
-        {standalone ? (
-          <div className="text-[12.5px] leading-relaxed text-ink-soft">
-            当前已以独立应用方式运行，断网也能打开。
-          </div>
-        ) : (
-          <>
-            <div className="text-[12.5px] leading-relaxed text-ink-soft">
-              <span className="text-ink">iPhone / iPad</span>：Safari 打开本页 → 底部「分享」→ 添加到主屏幕。
-              <br />
-              <span className="text-ink">Android</span>：Chrome 右上菜单 → 安装应用 / 添加到主屏幕。
-            </div>
-            {installable && (
-              <button
-                className="btn-secondary mt-2 w-full"
-                onClick={async () => {
-                  const r = await promptInstall();
-                  if (r === "accepted") toast("已开始安装", "ok");
-                  else if (r === "dismissed") toast("已取消安装", "info");
-                  else toast("请按上面的说明手动添加", "info");
-                }}
-              >
-                一键安装到桌面
-              </button>
-            )}
-            <div className="mt-1.5 text-[11.5px] text-ink-faint">
-              安装后像 App 一样全屏打开，数据仍只保存在本机。
-            </div>
-          </>
-        )}
-      </div>
-
       {/* 提醒 */}
 
       <RemindSheet
