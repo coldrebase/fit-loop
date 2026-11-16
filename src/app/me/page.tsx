@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
 import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
+import { notificationsSupported, syncReminders } from "@/lib/nativeNotify";
 import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
@@ -444,7 +445,11 @@ export default function MePage() {
         onSave={async (r) => {
           await saveProfile({ ...profile, reminders: r });
           setRemindOpen(false);
-          toast("提醒设置已保存", "ok");
+          // 原生 App 里同步为系统本地通知；网页版自动跳过
+          const res = await syncReminders(r);
+          if (!res.supported) toast("提醒设置已保存", "ok");
+          else if (!res.granted) toast("已保存，但通知权限未开启", "warn");
+          else toast(`已保存，排定 ${res.scheduled} 条通知`, "ok");
         }}
       />
 

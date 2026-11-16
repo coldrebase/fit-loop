@@ -50,6 +50,46 @@ npm run build:apk -- --debug
 | 系统健康数据 | 只能导出导入 | 可接入 Health Connect（需另写原生插件） |
 | 上架应用商店 | — | 需 Google Play 开发者账号（$25 一次性） |
 
+
+
+## 已接入的原生能力
+
+### 1) 本地通知（@capacitor/local-notifications）
+
+「我的 → 提醒」保存时同步为系统通知：
+
+- 饮水提醒：按间隔在工作时段（9:00–21:00）内排期，最多 8 条
+- 活动提醒：同上
+- 训练提醒：每天指定时间
+
+Android 13+ 会弹一次通知权限；拒绝后设置仍保存，只是不排期。
+网页/PWA 下这些调用自动跳过，不报错。
+
+### 2) Health Connect 直读（自写 Kotlin 插件）
+
+「我的 → 健康数据 → 导入」页在原生 App 里会多出一张 **Health Connect** 卡片：
+
+- 一键授权 → 读取最近 30 天体重 / 睡眠 / 静息心率
+- 读到的数据仍走「预览 → 确认导入」流程，不静默写入
+- 静息心率只统计不落库（本应用无对应字段）
+
+实现：`android/app/src/main/java/app/fitloop/mobile/HealthConnectPlugin.kt`
+（Health Connect 客户端是 Kotlin 协程 API，所以插件用 Kotlin 写；工程已启用 kotlin-android 插件）
+
+权限声明（AndroidManifest）：
+
+```xml
+android.permission.health.READ_WEIGHT
+android.permission.health.READ_SLEEP
+android.permission.health.READ_RESTING_HEART_RATE
+```
+
+已知约束：
+
+- minSdk 提升到 **26**（Android 8.0），因为 Health Connect 客户端库要求
+- Health Connect 依赖为 `androidx.health.connect:connect-client:1.1.0-alpha07`（1.1.0 稳定版要求 AGP 8.9 + compileSdk 36，本工程是 AGP 8.2 + compileSdk 34）
+- Android 14+ 系统内置 Health Connect；Android 9–13 需从商店安装 Health Connect 应用
+
 ## 后续可加的原生能力
 
 - **Health Connect 读取**：`androidx.health.connect` + 权限声明 + 原生插件，可直接读体重/睡眠

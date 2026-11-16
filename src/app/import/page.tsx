@@ -1,10 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
 import { Loading, toast } from "@/components/ui";
 import { AppleHealthParser, detectFormat, parseHealthCsv, type ParsedHealth } from "@/lib/healthImport";
+import {
+  ensureHealthPermissions,
+  healthConnectStatus,
+  healthConnectSupported,
+  openHealthConnectSettings,
+  readHealthConnect,
+  type HcStatus,
+} from "@/lib/healthConnect";
 import { listBodyWeights, listRecovery, saveBodyWeight, saveRecovery } from "@/lib/repo";
 import { uid } from "@/lib/utils";
 
@@ -27,6 +35,13 @@ export default function ImportPage() {
   const [progress, setProgress] = useState(0);
   const [parsed, setParsed] = useState<ParsedHealth | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [hcStatus, setHcStatus] = useState<HcStatus>("unsupported");
+  const [hcBusy, setHcBusy] = useState(false);
+
+  useEffect(() => {
+    if (!healthConnectSupported()) return;
+    void healthConnectStatus().then(setHcStatus);
+  }, []);
 
   if (!ready) return <Loading />;
 
@@ -69,6 +84,38 @@ export default function ImportPage() {
     } catch (err) {
       setPhase("idle");
       toast(err instanceof Error ? `解析失败：${err.message}` : "解析失败", "err");
+    }
+  }
+
+
+  async function syncHealthConnect() {
+    setHcBusy(true);
+    try {
+      const ok = await ensureHealthPermissions();
+      if (!ok) {
+        toast("没有拿到健康数据权限", "warn");
+        return;
+      }
+      const data = await readHealthConnect(30);
+      if (!data) {
+        toast("读取失败，请检查 Health Connect 是否已安装", "err");
+        return;
+      }
+      const result: ParsedHealth = {
+        weights: data.weights,
+        sleep: data.sleep,
+        restingHeartRate: data.restingHeartRate,
+        skipped: 0,
+        scanned: data.weights.length + data.sleep.length + data.restingHeartRate.length,
+      };
+      setParsed(result);
+      setPhase("preview");
+      setFileName("Health Connect（最近 30 天）");
+      if (!result.weights.length && !result.sleep.length) {
+        toast("Health Connect 里没有体重或睡眠记录", "warn");
+      }
+    } finally {
+      setHcBusy(false);
     }
   }
 
@@ -167,6 +214,36 @@ export default function ImportPage() {
           </li>
         </ol>
       </div>
+
+      {healthConnectSupported() && (
+        <div className="card">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[15px] font-medium">Health Connect</span>
+            <span className="text-[12px] text-ink-faint">
+              {hcStatus === "available" ? "可用" : hcStatus === "update_required" ? "需更新" : "不可用"}
+            </span>
+          </div>
+          {hcStatus === "available" ? (
+            <>
+              <div className="text-[12.5px] leading-relaxed text-ink-soft">
+                直接读取最近 30 天的体重、睡眠、静息心率，不需要导出文件。
+              </div>
+              <button className="btn-primary mt-2 w-full" onClick={() => void syncHealthConnect()} disabled={hcBusy}>
+                {hcBusy ? "读取中…" : "从 Health Connect 同步"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-[12.5px] leading-relaxed text-ink-soft">
+                设备上没有可用的 Health Connect。Android 14 起已内置；更早版本需从商店安装。
+              </div>
+              <button className="btn-secondary mt-2 w-full" onClick={() => void openHealthConnectSettings()}>
+                打开 Health Connect
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       <input
         ref={fileRef}
