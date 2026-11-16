@@ -355,7 +355,7 @@ export function WorkoutRunner({
               <span
                 className={cx(
                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[12px]",
-                  w.done ? "border-moss-600 bg-moss-600 text-white" : "border-paper-line text-transparent",
+                  w.done ? "border-moss-600 bg-moss-600 on-accent" : "border-paper-line text-transparent",
                 )}
               >
                 ✓
@@ -415,7 +415,7 @@ export function WorkoutRunner({
                 onClick={() => update((s) => ({ ...s, overallFeel: v }))}
                 className={cx(
                   "flex-1 rounded-xl border py-2.5 text-[14px]",
-                  session.overallFeel === v ? "border-moss-600 bg-moss-600 text-white" : "border-paper-line bg-paper-card",
+                  session.overallFeel === v ? "border-moss-600 bg-moss-600 on-accent" : "border-paper-line bg-paper-card",
                 )}
               >
                 {["很吃力", "吃力", "适中", "轻松", "很轻松"][v - 1]}
@@ -598,7 +598,7 @@ export function WorkoutRunner({
                 className={cx(
                   "rounded-lg border py-1.5 text-[12px] tabular-nums",
                   (curSet?.rpe ?? 0) === v
-                    ? "border-moss-600 bg-moss-600 text-white"
+                    ? "border-moss-600 bg-moss-600 on-accent"
                     : "border-paper-line bg-paper-card text-ink-soft",
                 )}
               >

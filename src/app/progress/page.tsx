@@ -492,7 +492,7 @@ function ScaleRow({
             onClick={() => onChange(v)}
             className={cx(
               "flex-1 rounded-lg border py-2 text-[13px]",
-              value === v ? "border-moss-600 bg-moss-600 text-white" : "border-paper-line bg-paper-card text-ink-soft",
+              value === v ? "border-moss-600 bg-moss-600 on-accent" : "border-paper-line bg-paper-card text-ink-soft",
             )}
           >
             {v}

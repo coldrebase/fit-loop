@@ -44,10 +44,10 @@ export function ToastHost() {
           key={t.id}
           className={cx(
             "fade-in max-w-[92vw] rounded-xl px-3.5 py-2 text-[13px] shadow-lift",
-            t.kind === "ok" && "bg-moss-600 text-white",
-            t.kind === "err" && "bg-alert text-white",
-            t.kind === "warn" && "bg-warn text-white",
-            t.kind === "info" && "bg-ink/90 text-white",
+            t.kind === "ok" && "bg-moss-600 on-accent",
+            t.kind === "err" && "bg-alert on-accent",
+            t.kind === "warn" && "bg-warn on-accent",
+            t.kind === "info" && "bg-ink/90 on-accent",
           )}
         >
           {t.text}

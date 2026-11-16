@@ -2,6 +2,231 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================================
+ * 主题（配色 / 圆角 / 阴影）
+ * ---------------------------------------------------------------------------
+ * 1) 所有颜色都是 RGB 三元组，供 tailwind.config.ts 用 rgb(var(--x) / <alpha>)
+ * 2) 切换方式：<html data-theme="paper|minimal|dark|soft">
+ * 3) 默认 :root 即 paper，未设置 data-theme 时保持原有观感
+ * ========================================================================= */
+
+:root,
+[data-theme="paper"] {
+  color-scheme: light;
+  --c-bg: 251 249 246;
+  --c-card: 255 255 255;
+  --c-line: 236 231 224;
+  --c-ink: 38 38 42;
+  --c-ink-soft: 91 91 99;
+  --c-ink-faint: 107 107 115;
+  --c-accent-50: 238 245 242;
+  --c-accent-100: 216 232 226;
+  --c-accent-300: 147 192 179;
+  --c-accent-500: 79 140 123;
+  --c-accent-600: 63 120 103;
+  --c-accent-700: 51 96 79;
+  --c-clay-50: 253 241 235;
+  --c-clay-100: 249 221 206;
+  --c-clay-500: 224 129 85;
+  --c-clay-600: 168 86 47;
+  --c-alert: 176 71 62;
+  --c-warn: 138 92 18;
+  --c-on-accent: 255 255 255;
+  --r-lg: 0.5rem;
+  --r-xl: 0.75rem;
+  --r-xl2: 1.125rem;
+  --r-2xl: 1rem;
+  --r-3xl: 1.5rem;
+  --shadow-soft: 0 2px 14px rgba(38, 38, 42, 0.06);
+  --shadow-lift: 0 8px 28px rgba(38, 38, 42, 0.1);
+}
+
+/* B · 极简编辑风：纯白底、近黑字、细线、几乎直角、无阴影、橙色点缀 */
+[data-theme="minimal"] {
+  color-scheme: light;
+  --c-bg: 255 255 255;
+  --c-card: 255 255 255;
+  --c-line: 228 228 231;
+  --c-ink: 9 9 11;
+  --c-ink-soft: 63 63 70;
+  --c-ink-faint: 113 113 122;
+  --c-accent-50: 245 245 245;
+  --c-accent-100: 229 229 229;
+  --c-accent-300: 161 161 170;
+  --c-accent-500: 63 63 70;
+  --c-accent-600: 9 9 11;
+  --c-accent-700: 0 0 0;
+  --c-clay-50: 255 247 237;
+  --c-clay-100: 255 237 213;
+  --c-clay-500: 249 115 22;
+  --c-clay-600: 194 65 12;
+  --c-alert: 185 28 28;
+  --c-warn: 161 98 7;
+  --c-on-accent: 255 255 255;
+  --r-lg: 2px;
+  --r-xl: 3px;
+  --r-xl2: 3px;
+  --r-2xl: 4px;
+  --r-3xl: 5px;
+  --shadow-soft: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* C · 深色运动：炭黑底 + 荧光绿强调 */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --c-bg: 10 12 14;
+  --c-card: 20 24 27;
+  --c-line: 39 46 51;
+  --c-ink: 240 244 243;
+  --c-ink-soft: 170 182 179;
+  --c-ink-faint: 128 142 138;
+  --c-accent-50: 26 33 21;
+  --c-accent-100: 40 50 26;
+  --c-accent-300: 122 152 62;
+  --c-accent-500: 190 232 90;
+  --c-accent-600: 198 242 78;
+  --c-accent-700: 216 255 138;
+  --c-clay-50: 41 27 19;
+  --c-clay-100: 60 37 23;
+  --c-clay-500: 245 158 90;
+  --c-clay-600: 252 186 128;
+  --c-alert: 255 141 130;
+  --c-warn: 250 205 105;
+  --c-on-accent: 12 16 10;
+  --r-lg: 6px;
+  --r-xl: 10px;
+  --r-xl2: 14px;
+  --r-2xl: 12px;
+  --r-3xl: 18px;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* C2 · 深色 + 电光青（冷、科技感） */
+[data-theme="dark-cyan"] {
+  color-scheme: dark;
+  --c-bg: 7 11 16;
+  --c-card: 15 22 32;
+  --c-line: 30 40 54;
+  --c-ink: 237 243 248;
+  --c-ink-soft: 165 180 195;
+  --c-ink-faint: 122 138 154;
+  --c-accent-50: 12 30 38;
+  --c-accent-100: 18 44 56;
+  --c-accent-300: 60 150 170;
+  --c-accent-500: 72 214 234;
+  --c-accent-600: 34 211 238;
+  --c-accent-700: 160 242 255;
+  --c-clay-50: 41 24 17;
+  --c-clay-100: 60 34 23;
+  --c-clay-500: 245 150 90;
+  --c-clay-600: 250 182 132;
+  --c-alert: 255 145 134;
+  --c-warn: 250 205 105;
+  --c-on-accent: 6 18 22;
+  --r-lg: 6px;
+  --r-xl: 10px;
+  --r-xl2: 14px;
+  --r-2xl: 12px;
+  --r-3xl: 18px;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* C3 · 深色 + 熔岩橙（力量、热量感） */
+[data-theme="dark-orange"] {
+  color-scheme: dark;
+  --c-bg: 18 16 15;
+  --c-card: 28 25 23;
+  --c-line: 46 42 38;
+  --c-ink: 245 242 238;
+  --c-ink-soft: 178 170 162;
+  --c-ink-faint: 138 130 122;
+  --c-accent-50: 42 23 16;
+  --c-accent-100: 58 32 22;
+  --c-accent-300: 145 82 55;
+  --c-accent-500: 255 130 80;
+  --c-accent-600: 255 107 53;
+  --c-accent-700: 255 196 168;
+  --c-clay-50: 42 26 18;
+  --c-clay-100: 62 38 24;
+  --c-clay-500: 250 170 110;
+  --c-clay-600: 253 200 152;
+  --c-alert: 255 138 128;
+  --c-warn: 250 200 100;
+  --c-on-accent: 22 10 6;
+  --r-lg: 6px;
+  --r-xl: 10px;
+  --r-xl2: 14px;
+  --r-2xl: 12px;
+  --r-3xl: 18px;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* C4 · 深色 + 电光紫（夜跑、时髦） */
+[data-theme="dark-purple"] {
+  color-scheme: dark;
+  --c-bg: 11 9 16;
+  --c-card: 22 18 31;
+  --c-line: 40 34 55;
+  --c-ink: 242 240 248;
+  --c-ink-soft: 176 170 195;
+  --c-ink-faint: 133 126 152;
+  --c-accent-50: 31 23 47;
+  --c-accent-100: 44 33 66;
+  --c-accent-300: 112 92 162;
+  --c-accent-500: 167 139 250;
+  --c-accent-600: 167 139 250;
+  --c-accent-700: 208 194 255;
+  --c-clay-50: 40 24 20;
+  --c-clay-100: 58 34 28;
+  --c-clay-500: 245 155 100;
+  --c-clay-600: 250 185 140;
+  --c-alert: 255 145 140;
+  --c-warn: 250 205 110;
+  --c-on-accent: 16 10 26;
+  --r-lg: 6px;
+  --r-xl: 10px;
+  --r-xl2: 14px;
+  --r-2xl: 12px;
+  --r-3xl: 18px;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* D · 柔光蓝：浅雾底 + 大圆角 + 柔和投影 */
+[data-theme="soft"] {
+  color-scheme: light;
+  --c-bg: 242 246 252;
+  --c-card: 255 255 255;
+  --c-line: 226 233 243;
+  --c-ink: 18 28 43;
+  --c-ink-soft: 82 100 124;
+  --c-ink-faint: 116 135 160;
+  --c-accent-50: 238 244 255;
+  --c-accent-100: 216 231 255;
+  --c-accent-300: 147 180 240;
+  --c-accent-500: 59 130 246;
+  --c-accent-600: 37 99 235;
+  --c-accent-700: 29 78 216;
+  --c-clay-50: 255 244 238;
+  --c-clay-100: 255 228 214;
+  --c-clay-500: 249 132 74;
+  --c-clay-600: 194 84 30;
+  --c-alert: 190 44 44;
+  --c-warn: 150 100 10;
+  --c-on-accent: 255 255 255;
+  --r-lg: 0.75rem;
+  --r-xl: 1rem;
+  --r-xl2: 1.25rem;
+  --r-2xl: 1.25rem;
+  --r-3xl: 1.75rem;
+  --shadow-soft: 0 4px 18px rgba(37, 99, 235, 0.08);
+  --shadow-lift: 0 10px 30px rgba(37, 99, 235, 0.14);
+}
+
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -9,8 +234,10 @@
 @layer base {
   html,
   body {
-    @apply bg-paper text-ink antialiased;
-    -webkit-tap-highlight-color: transparent;
+    background-color: rgb(var(--c-bg));
+    color: rgb(var(--c-ink));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   body {
     font-size: 15px;
@@ -44,16 +271,22 @@
 
 @layer components {
   .card {
-    @apply rounded-xl2 border border-paper-line bg-paper-card p-4 shadow-soft;
+    @apply rounded-xl2 border border-paper-line bg-paper-card p-4;
+    box-shadow: var(--shadow-soft);
   }
   .card-tight {
-    @apply rounded-xl2 border border-paper-line bg-paper-card p-3 shadow-soft;
+    @apply rounded-xl2 border border-paper-line bg-paper-card p-3;
+    box-shadow: var(--shadow-soft);
   }
   .btn {
     @apply inline-flex select-none items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium transition active:scale-[.98] disabled:pointer-events-none disabled:opacity-40;
   }
+  /* 强调色按钮：底色与文字色都来自主题变量（深色主题下荧光底配深色字） */
   .btn-primary {
-    @apply btn bg-moss-600 text-white shadow-soft;
+    @apply btn;
+    background-color: rgb(var(--c-accent-600));
+    color: rgb(var(--c-on-accent));
+    box-shadow: var(--shadow-soft);
   }
   .btn-secondary {
     @apply btn border border-paper-line bg-paper-card text-ink;
@@ -71,7 +304,10 @@
     @apply inline-flex items-center gap-1 rounded-full border border-paper-line bg-paper px-2.5 py-1 text-xs text-ink-soft;
   }
   .chip-active {
-    @apply border-moss-600 bg-moss-600 text-white;
+    @apply border;
+    border-color: rgb(var(--c-accent-600));
+    background-color: rgb(var(--c-accent-600));
+    color: rgb(var(--c-on-accent));
   }
   .label {
     @apply mb-1.5 block text-[13px] font-medium text-ink-soft;
@@ -86,6 +322,11 @@
   .divide-dot {
     @apply border-t border-dashed border-paper-line;
   }
+}
+
+/* 强调色底上的文字：浅色主题=白，深色主题=近黑 */
+.on-accent {
+  color: rgb(var(--c-on-accent));
 }
 
 .sheet-enter {

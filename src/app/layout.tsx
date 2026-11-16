@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppProvider } from "@/components/AppProvider";
 import { BottomNav } from "@/components/BottomNav";
+import { ThemeBoot } from "@/components/ThemeBoot";
 import { ToastHost } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <body>
+        <ThemeBoot />
         <AppProvider>
           <div className="mx-auto flex min-h-screen w-full max-w-[560px] flex-col bg-paper">
             <main className="flex-1 pb-24">{children}</main>

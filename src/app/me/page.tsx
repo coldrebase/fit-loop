@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useApp } from "@/components/AppProvider";
+import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
 import { targetsFor } from "@/lib/nutrition";
@@ -70,6 +71,7 @@ export default function MePage() {
     wipe,
   } = useApp();
   const [editProfile, setEditProfile] = useState(false);
+  const [mode, setMode] = useThemeMode();
   const [editVenue, setEditVenue] = useState<Venue | null>(null);
   const [pendingDeleteVenue, setPendingDeleteVenue] = useState<Venue | null>(null);
   const [editDiet, setEditDiet] = useState(false);
@@ -212,6 +214,25 @@ export default function MePage() {
           <Row label="每日预算" value={diet.budgetPerDay ? `¥${diet.budgetPerDay}` : "不限"} />
           <Row label="做饭条件" value={COOKING_ABILITY[diet.cookingAbility]} />
           <Row label="每日餐次" value={`${diet.mealsPerDay} 餐`} />
+        </div>
+      </div>
+
+      {/* 外观 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[15px] font-medium">外观</span>
+          <span className="text-[12px] text-ink-faint">{mode === "dark" ? "夜间模式" : "日间模式"}</span>
+        </div>
+        <Segmented<ThemeMode>
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: "light", label: "日间" },
+            { value: "dark", label: "夜间" },
+          ]}
+        />
+        <div className="mt-1.5 text-[11.5px] text-ink-faint">
+          夜间模式为深色背景，适合暗光环境。选择保存在本机，立即生效。
         </div>
       </div>
 

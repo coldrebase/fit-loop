@@ -1,41 +1,35 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * 配色全部走 CSS 变量（RGB 三元组），这样同一个类名可以在不同主题下换色。
+ * 变量定义见 src/app/globals.css 的 [data-theme="..."] 块。
+ * 写法 `rgb(var(--x) / <alpha-value>)` 是为了让 bg-alert/5 这类透明度修饰符继续可用。
+ */
+const c = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        ink: {
-          DEFAULT: "#26262A",
-          soft: "#5B5B63",
-          // 原 #8E8E96 在 paper #FBF9F6 上仅 3.09:1（WCAG AA 正文需 4.5:1），
-          // 该色用于 11-13px 正文（68 处），故加深到 5.03:1；仍保持低对比的次要语气。
-          faint: "#6B6B73",
-        },
-        paper: {
-          DEFAULT: "#FBF9F6",
-          card: "#FFFFFF",
-          line: "#ECE7E0",
-        },
+        ink: { DEFAULT: c("c-ink"), soft: c("c-ink-soft"), faint: c("c-ink-faint") },
+        paper: { DEFAULT: c("c-bg"), card: c("c-card"), line: c("c-line") },
         moss: {
-          50: "#EEF5F2",
-          100: "#D8E8E2",
-          300: "#93C0B3",
-          500: "#4F8C7B",
-          600: "#3F7867",
-          700: "#33604F",
+          50: c("c-accent-50"),
+          100: c("c-accent-100"),
+          300: c("c-accent-300"),
+          500: c("c-accent-500"),
+          600: c("c-accent-600"),
+          700: c("c-accent-700"),
         },
         clay: {
-          50: "#FDF1EB",
-          100: "#F9DDCE",
-          500: "#E08155",
-          // 原 #C96B41 在 paper 上 3.53:1，作为小号文字不达标 → 4.95:1
-          600: "#A8562F",
+          50: c("c-clay-50"),
+          100: c("c-clay-100"),
+          500: c("c-clay-500"),
+          600: c("c-clay-600"),
         },
-        // 以下两个既作小号文字（text-warn/text-alert）又作底色（bg-warn/bg-alert + 白字），
-        // 均按「paper 底 4.5:1 以上、白字 4.5:1 以上」取深一档。
-        alert: "#B0473E",
-        warn: "#8A5C12",
+        alert: c("c-alert"),
+        warn: c("c-warn"),
       },
       fontFamily: {
         sans: [
@@ -49,11 +43,15 @@ const config: Config = {
         ],
       },
       borderRadius: {
-        xl2: "1.125rem",
+        lg: "var(--r-lg)",
+        xl: "var(--r-xl)",
+        xl2: "var(--r-xl2)",
+        "2xl": "var(--r-2xl)",
+        "3xl": "var(--r-3xl)",
       },
       boxShadow: {
-        soft: "0 2px 14px rgba(38,38,42,0.06)",
-        lift: "0 8px 28px rgba(38,38,42,0.10)",
+        soft: "var(--shadow-soft)",
+        lift: "var(--shadow-lift)",
       },
       keyframes: {
         "fade-up": {

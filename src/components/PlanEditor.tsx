@@ -63,11 +63,11 @@ export function PlanEditor({
             onClick={() => setDayIdx(i)}
             className={cx(
               "shrink-0 rounded-xl border px-3 py-2 text-left",
-              i === activeDayIdx ? "border-moss-600 bg-moss-600 text-white" : "border-paper-line bg-paper-card",
+              i === activeDayIdx ? "border-moss-600 bg-moss-600 on-accent" : "border-paper-line bg-paper-card",
             )}
           >
             <div className="text-[13px] font-medium">{d.title}</div>
-            <div className={cx("text-[11px]", i === activeDayIdx ? "text-white/80" : "text-ink-faint")}>
+            <div className={cx("text-[11px]", i === activeDayIdx ? "on-accent opacity-80" : "text-ink-faint")}>
               {d.items.length} 个动作 · 约 {d.estimatedMinutes} 分钟
             </div>
           </button>
