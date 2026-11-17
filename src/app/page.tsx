@@ -4,18 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
 import { Onboarding } from "@/components/Onboarding";
+import { ProgressRing } from "@/components/ProgressRing";
 import { WorkoutRunner } from "@/components/WorkoutRunner";
 import { Chip, Loading, toast } from "@/components/ui";
+import { nutrientTotals, targetsFor } from "@/lib/nutrition";
 import { newSession } from "@/lib/session";
 import { EXERCISE_MAP } from "@/lib/seed/exercises";
 import { addDays, isoDateOf, startOfWeekISO, todayISO, weekdayCN, weekdayOf } from "@/lib/utils";
 
 /**
- * 今日页
+ * 今日（首页）
  * ---------------------------------------------------------------------------
- * 只回答「现在做什么」：一份计划、一个按钮、一条上周对比。
- * 饮食的「今天还能吃多少」在饮食页（同一份数据，不在两页各说一遍），
- * 训练历史在数据页 —— 首页不再重复汇报。
+ * 目标：打开就知道「今天要做什么、还差什么」。
+ *   - 训练：今天练什么 + 一个按钮（已完成时明说已练完）
+ *   - 进度：饮水、热量两个环 + 就地快记
+ *   - 还没做：只列没完成的项，全部完成就明说
+ * 饮食的详细拆分在饮食页，这里不重复展开；体重等记录收在数据页。
  */
 export default function TodayPage() {
   const router = useRouter();
@@ -25,8 +29,9 @@ export default function TodayPage() {
     activePlan,
     activeVenue,
     sessions,
-    weights,
+    entries,
     water,
+    foods,
     saveProfile,
     saveSession,
     addWater,
@@ -44,10 +49,17 @@ export default function TodayPage() {
 
   const inProgress = useMemo(() => sessions.find((s) => s.status === "in_progress"), [sessions]);
   const todayDay = activePlan?.days.find((d) => d.weekday === wd);
+  const todayEntries = useMemo(() => entries.filter((e) => e.date === today), [entries, today]);
+  const targets = useMemo(() => targetsFor(profile), [profile]);
+  const totals = useMemo(() => nutrientTotals(todayEntries, foods), [todayEntries, foods]);
 
   const todayWater = water.find((w) => w.date === today)?.ml ?? 0;
-  const latestWeight = weights[weights.length - 1];
   const waterTarget = Math.round(profile.weightKg * 35);
+  const intakeKcal = Math.round(totals.kcal);
+
+  const trainedToday = sessions.filter(
+    (s) => s.status === "completed" && isoDateOf(s.startedAt) === today,
+  ).length;
 
   /* ----------------------------- 比上周（一条记录） ---------------------------- */
   const weekStart = startOfWeekISO(today);
@@ -106,6 +118,24 @@ export default function TodayPage() {
     setRunning(s);
   }
 
+  /* ------------------------------- 今天还没做 ------------------------------- */
+  const remaining: { key: string; text: string; href: string }[] = [];
+  if (inProgress) {
+    remaining.push({ key: "train", text: `训练没做完：${inProgress.title}`, href: "/train" });
+  } else if (trainedToday === 0 && (todayDay || activePlan)) {
+    remaining.push({
+      key: "train",
+      text: todayDay ? `还没练：${todayDay.title}` : "今天休息，不用练",
+      href: "/train",
+    });
+  }
+  if (todayEntries.length === 0) {
+    remaining.push({ key: "eat", text: "还没记录今天的饮食", href: "/diet" });
+  }
+  if (todayWater < waterTarget) {
+    remaining.push({ key: "water", text: `水还差 ${waterTarget - todayWater} ml`, href: "" });
+  }
+
   return (
     <div className="space-y-3 p-4">
       <div className="pt-1">
@@ -124,10 +154,10 @@ export default function TodayPage() {
         </div>
       )}
 
-      {/* 现在做什么：只留一个按钮 */}
+      {/* 1. 今天要练什么：一个按钮 */}
       <div className="card">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-[13px] text-ink-faint">现在做什么</span>
+          <span className="text-[13px] text-ink-faint">今天要练</span>
           <button className="text-[12px] text-moss-600 underline" onClick={() => router.push("/train")}>
             查看计划
           </button>
@@ -142,6 +172,21 @@ export default function TodayPage() {
             </div>
             <button className="btn-primary btn-lg mt-3" onClick={() => setRunning(inProgress)}>
               继续训练
+            </button>
+          </>
+        ) : trainedToday > 0 ? (
+          <>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[16px] font-semibold text-moss-600">今天已经练完了</span>
+              <span className="chip border-moss-300 bg-moss-50 !py-0 text-[10px] text-moss-700">
+                完成 {trainedToday} 次
+              </span>
+            </div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">
+              恢复也是训练的一部分。想加练就再开一场，不想动就好好休息。
+            </div>
+            <button className="btn-secondary btn-lg mt-3" onClick={() => void startToday()}>
+              再练一次
             </button>
           </>
         ) : todayDay ? (
@@ -164,7 +209,7 @@ export default function TodayPage() {
           <>
             <div className="text-[15px] font-medium">今天是休息日</div>
             <div className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">
-              恢复也是训练的一部分。可以散个步、拉伸，或者补记一次训练。
+              不用练，散个步或拉伸一下就好。
             </div>
             <button className="btn-secondary btn-lg mt-3" onClick={() => router.push("/train")}>
               看看下次练什么
@@ -181,7 +226,86 @@ export default function TodayPage() {
         )}
       </div>
 
-      {/* 比上周：一条记录 */}
+      {/* 2. 今天进度：饮水 / 热量两个环 */}
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[13px] text-ink-faint">今天进度</span>
+          <button className="text-[12px] text-moss-600 underline" onClick={() => router.push("/diet")}>
+            记一餐
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col items-center">
+            <ProgressRing
+              value={todayWater}
+              max={waterTarget}
+              className="stroke-macro-carb"
+              label={`饮水：已喝 ${todayWater} 毫升，目标 ${waterTarget} 毫升`}
+            >
+              <div className="text-[19px] font-semibold leading-none tabular-nums">{todayWater}</div>
+              <div className="mt-0.5 text-[10.5px] leading-none text-ink-faint">/ {waterTarget} ml</div>
+            </ProgressRing>
+            <div className="mt-1.5 text-[12px] text-ink-faint">饮水</div>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <ProgressRing
+              value={intakeKcal}
+              max={targets.kcal}
+              className="stroke-macro-protein"
+              label={`热量：已记录摄入 ${intakeKcal} 千卡，目标 ${targets.kcal} 千卡`}
+            >
+              <div className="text-[19px] font-semibold leading-none tabular-nums">{intakeKcal}</div>
+              <div className="mt-0.5 text-[10.5px] leading-none text-ink-faint">/ {targets.kcal} kcal</div>
+            </ProgressRing>
+            <div className="mt-1.5 text-[12px] text-ink-faint">热量（已记录）</div>
+          </div>
+        </div>
+
+        <div className="mt-3 flex gap-1">
+          {[200, 300, 500].map((ml) => (
+            <button
+              key={ml}
+              className="btn-secondary flex-1 !px-1 !py-1.5 text-[12px]"
+              onClick={() => void addWater(today, ml)}
+            >
+              +{ml} ml
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. 今天还没做：只列没完成的 */}
+      <div className="card">
+        <div className="mb-2 text-[13px] text-ink-faint">今天还没做</div>
+        {remaining.length === 0 ? (
+          <div className="flex items-center gap-1.5 text-[13.5px] text-moss-600">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            训练、饮食、饮水都记上了，今天可以收工。
+          </div>
+        ) : (
+          <ul className="space-y-1.5">
+            {remaining.map((t) => (
+              <li key={t.key}>
+                <button
+                  className="flex w-full items-center gap-2 text-left text-[13.5px] text-ink-soft"
+                  onClick={() => t.href && router.push(t.href)}
+                  disabled={!t.href}
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-clay-500" />
+                  <span className="min-w-0 flex-1 truncate">{t.text}</span>
+                  {t.href && <span className="shrink-0 text-[12px] text-moss-600 underline">去完成</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* 4. 比上周：一行 */}
       <div className="card-tight flex items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="text-[11.5px] text-ink-faint">比上周</div>
@@ -193,49 +317,6 @@ export default function TodayPage() {
         >
           看周报
         </button>
-      </div>
-
-      {/* 快速记录（饮水 / 体重） */}
-      <div className="card">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-[13px] text-ink-faint">快速记录</span>
-          <button className="text-[12px] text-moss-600 underline" onClick={() => router.push("/diet")}>
-            记饮食
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-paper-line px-3 py-2.5">
-            <div className="text-[12px] text-ink-faint">饮水</div>
-            <div className="text-[16px] font-semibold tabular-nums">
-              {todayWater}
-              <span className="text-[11px] font-normal text-ink-faint"> / {waterTarget} ml</span>
-            </div>
-            <div className="mt-1.5 flex gap-1">
-              {[200, 300, 500].map((ml) => (
-                <button
-                  key={ml}
-                  className="btn-secondary flex-1 !px-1 !py-1 text-[12px]"
-                  onClick={() => void addWater(today, ml)}
-                >
-                  +{ml}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-xl border border-paper-line px-3 py-2.5">
-            <div className="text-[12px] text-ink-faint">体重</div>
-            <div className="text-[16px] font-semibold tabular-nums">
-              {latestWeight ? latestWeight.weightKg : "—"}
-              <span className="text-[11px] font-normal text-ink-faint"> kg</span>
-            </div>
-            <button
-              className="btn-secondary mt-1.5 w-full !py-1 text-[12px]"
-              onClick={() => router.push("/progress?tab=body")}
-            >
-              记录体重
-            </button>
-          </div>
-        </div>
       </div>
 
       <OnboardingFlow

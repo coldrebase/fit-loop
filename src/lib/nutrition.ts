@@ -1,4 +1,5 @@
 import type {
+  Food,
   FoodEntry,
   NutrientsPer100g,
   NutritionTargets,
@@ -6,6 +7,7 @@ import type {
   TrainingGoal,
   UserProfile,
 } from "./types";
+import { FOOD_MAP } from "./seed/foods";
 import { clamp, round } from "./utils";
 
 /**
@@ -173,6 +175,24 @@ export function sumNutrients(list: NutrientsPer100g[]): NutrientsPer100g {
     }),
     { ...ZERO },
   );
+}
+
+/**
+ * 把一组饮食记录折算成营养合计（内置库 + 用户自建食物）。
+ * 首页、饮食页都走这一个口径：内置库查 FOOD_MAP，自建食物查 foods，
+ * 两处都不命中才按 0 计（绝不伪造数值）。之前这段逻辑在两个页面各抄了一遍。
+ */
+export function nutrientTotals(entries: FoodEntry[], foods: Food[] = []): NutrientsPer100g {
+  return entries.reduce<NutrientsPer100g>((acc, e) => {
+    const food = e.foodId ? (FOOD_MAP[e.foodId] ?? foods.find((f) => f.id === e.foodId)) : undefined;
+    const n = nutrientsFor(e, food?.per100g ?? ZERO);
+    return {
+      kcal: acc.kcal + n.kcal,
+      proteinG: acc.proteinG + n.proteinG,
+      carbG: acc.carbG + n.carbG,
+      fatG: acc.fatG + n.fatG,
+    };
+  }, { ...ZERO });
 }
 
 /** 常见烹饪方式的建议用油量（克 / 每 100g 食材），仅作默认值，用户可改 */

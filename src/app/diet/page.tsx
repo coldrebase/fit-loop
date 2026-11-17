@@ -6,7 +6,7 @@ import { FoodAdder } from "@/components/FoodAdder";
 import { MacroRing, type MacroSlice } from "@/components/MacroRing";
 import { PhotoPanel } from "@/components/PhotoPanel";
 import { DemoBadge, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
-import { SLOT_LABEL, nutrientsFor, targetsFor, computeTargets } from "@/lib/nutrition";
+import { SLOT_LABEL, nutrientTotals, nutrientsFor, targetsFor, computeTargets } from "@/lib/nutrition";
 import { FOOD_MAP } from "@/lib/seed/foods";
 import type { FoodEntry, MealSlot, NutritionTargets, ShoppingItem } from "@/lib/types";
 import { addDays, cx, todayISO, uid } from "@/lib/utils";
@@ -36,23 +36,7 @@ export default function DietPage() {
   const dayEntries = useMemo(() => entries.filter((e) => e.date === date), [entries, date]);
   const targets = useMemo(() => targetsFor(profile), [profile]);
 
-  const totals = useMemo(() => {
-    const list = dayEntries.map((e) => {
-      // 内置库走 FOOD_MAP，用户自建食物只在 foods store；两者都要查，否则自建食物按 0 计算
-      const food = e.foodId ? (FOOD_MAP[e.foodId] ?? foods.find((f) => f.id === e.foodId)) : undefined;
-      const per100 = food?.per100g ?? { kcal: 0, proteinG: 0, carbG: 0, fatG: 0 };
-      return nutrientsFor(e, per100);
-    });
-    return list.reduce(
-      (acc, n) => ({
-        kcal: acc.kcal + n.kcal,
-        proteinG: acc.proteinG + n.proteinG,
-        carbG: acc.carbG + n.carbG,
-        fatG: acc.fatG + n.fatG,
-      }),
-      { kcal: 0, proteinG: 0, carbG: 0, fatG: 0 },
-    );
-  }, [dayEntries, foods]);
+  const totals = useMemo(() => nutrientTotals(dayEntries, foods), [dayEntries, foods]);
 
   const isToday = date === todayISO();
   const remainKcal = Math.round(targets.kcal - totals.kcal);
