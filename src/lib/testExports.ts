@@ -15,3 +15,4 @@ export * from "./seed/foods";
 export * from "./seed/muscles";
 export * from "./healthImport";
 export * from "./backup";
+export * from "./appMeta";

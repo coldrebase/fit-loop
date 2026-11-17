@@ -1,6 +1,6 @@
 {
   "name": "fit-loop",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "FitLoop · 训练 / 饮食 / 复盘一体化的移动端优先健身管理应用（本地优先，无后端可用）",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "next start -p 3000",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/build.mjs && node --test tests/plan.test.mjs tests/nutrition.test.mjs tests/health.test.mjs tests/backup.test.mjs",
+    "test": "node tests/build.mjs && node --test tests/plan.test.mjs tests/nutrition.test.mjs tests/health.test.mjs tests/backup.test.mjs tests/version.test.mjs",
     "test:build": "node tests/build.mjs",
     "build:static": "node scripts/build-static.mjs",
     "deploy:pages": "node scripts/deploy-pages.mjs",

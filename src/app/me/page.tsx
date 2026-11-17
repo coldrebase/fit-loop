@@ -8,6 +8,7 @@ import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { notificationsSupported, syncReminders } from "@/lib/nativeNotify";
 import { VisionSettings } from "@/components/VisionSettings";
 import { MODE_LABEL, useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
+import { APP_VERSION } from "@/lib/appMeta";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
 import { targetsFor } from "@/lib/nutrition";
@@ -348,8 +349,8 @@ export default function MePage() {
             : "内存模式（IndexedDB 不可用，刷新即丢失）"}
           。
           <span className="text-alert"> IndexedDB 不等于云备份</span>
-          —— 清理浏览器数据、卸载浏览器或换设备都会丢失。导出的 JSON 是唯一的跨设备备份，
-          换机后可以用下面的「从备份文件恢复」读回来。
+          —— 清理浏览器数据、卸载浏览器或换设备都会丢失。网页版和 App 的数据不会自动同步，
+          一端「导出」、另一端「从备份文件恢复」就能搬过去（两端同一份备份格式）。
         </div>
         <div className="space-y-2">
           <button className="btn-secondary w-full" onClick={() => void exportJson()}>
@@ -373,6 +374,9 @@ export default function MePage() {
           <button className="btn-danger w-full" onClick={() => setConfirmWipe(true)}>
             删除全部个人数据
           </button>
+        </div>
+        <div className="mt-2 text-center text-[11px] text-ink-faint">
+          FitLoop {APP_VERSION} · 网页版与 App 同一份代码、同一套备份格式
         </div>
       </div>
 

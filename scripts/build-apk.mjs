@@ -31,7 +31,9 @@ function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, {
     cwd: opts.cwd ?? root,
     stdio: "inherit",
-    shell: process.platform === "win32",
+    // shell 只给 .cmd/.bat 用：Windows 上给 node.exe 也开 shell 会把
+    // "C:\Program Files\nodejs\node.exe" 按空格切碎，构建立刻失败。
+    shell: process.platform === "win32" && /\.(cmd|bat)$/i.test(cmd),
     env: { ...process.env, NODE_OPTIONS: "" },
   });
   if (r.status !== 0) throw new Error(`失败：${cmd} ${args.join(" ")}（退出码 ${r.status}）`);

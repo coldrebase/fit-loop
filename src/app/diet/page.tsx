@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { useApp } from "@/components/AppProvider";
 import { FoodAdder } from "@/components/FoodAdder";
+import { MacroRing, type MacroSlice } from "@/components/MacroRing";
 import { PhotoPanel } from "@/components/PhotoPanel";
-import { Bar, DemoBadge, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
+import { DemoBadge, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { SLOT_LABEL, nutrientsFor, targetsFor, computeTargets } from "@/lib/nutrition";
 import { FOOD_MAP } from "@/lib/seed/foods";
 import type { FoodEntry, MealSlot, NutritionTargets, ShoppingItem } from "@/lib/types";
@@ -53,6 +54,26 @@ export default function DietPage() {
     );
   }, [dayEntries, foods]);
 
+  const isToday = date === todayISO();
+  const remainKcal = Math.round(targets.kcal - totals.kcal);
+  const proteinLeft = Math.max(0, Math.round(targets.proteinG - totals.proteinG));
+  // 「还能吃多少」只在这里说一次：清楚、可执行，不造焦虑
+  const eatLine = !isToday
+    ? `这天摄入 ${Math.round(totals.kcal)} kcal，目标 ${targets.kcal} kcal。`
+    : dayEntries.length === 0
+      ? `今天还没记录，目标是 ${targets.kcal} kcal——先记一餐就有数了。`
+      : remainKcal >= 0
+        ? proteinLeft >= 15
+          ? `今天还能吃 ${remainKcal} kcal，蛋白还差 ${proteinLeft} g。`
+          : `今天还能吃 ${remainKcal} kcal，蛋白已经够了。`
+        : `今天超出目标 ${-remainKcal} kcal。不用补偿性节食，保持规律就行。`;
+
+  const macros: MacroSlice[] = [
+    { label: "蛋白质", value: totals.proteinG, target: targets.proteinG, stroke: "stroke-macro-protein", dot: "bg-macro-protein" },
+    { label: "碳水", value: totals.carbG, target: targets.carbG, stroke: "stroke-macro-carb", dot: "bg-macro-carb" },
+    { label: "脂肪", value: totals.fatG, target: targets.fatG, stroke: "stroke-macro-fat", dot: "bg-macro-fat" },
+  ];
+
   if (!ready) return <Loading />;
 
   return (
@@ -75,23 +96,33 @@ export default function DietPage() {
         </button>
       </div>
 
-      {/* 目标 */}
+      {/* 今天还能吃多少：全应用只在这里说一次，今日页不再重复 */}
       <div className="card">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[14px] font-medium">今日摄入</span>
+          <span className="text-[14px] font-medium">{isToday ? "今天还能吃多少" : "当日摄入"}</span>
           <button className="text-[12px] text-moss-600 underline" onClick={() => setTargetsOpen(true)}>
             依据 / 修改目标
           </button>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center">
-          <Num label="热量" v={Math.round(totals.kcal)} max={targets.kcal} unit="kcal" />
-          <Num label="蛋白质" v={Math.round(totals.proteinG * 10) / 10} max={targets.proteinG} unit="g" />
-          <Num label="碳水" v={Math.round(totals.carbG * 10) / 10} max={targets.carbG} unit="g" />
-          <Num label="脂肪" v={Math.round(totals.fatG * 10) / 10} max={targets.fatG} unit="g" />
-        </div>
-        <div className="mt-3 space-y-1.5">
-          <BarLine label="热量" v={totals.kcal} max={targets.kcal} />
-          <BarLine label="蛋白质" v={totals.proteinG} max={targets.proteinG} tone="clay" />
+        <div className="flex flex-wrap items-center gap-3">
+          <MacroRing kcal={totals.kcal} kcalTarget={targets.kcal} macros={macros} />
+          <div className="min-w-0 flex-1 basis-[180px]">
+            <div className="text-[14px] font-medium leading-snug">{eatLine}</div>
+            <div className="mt-1 text-[11.5px] text-ink-faint">
+              已记 {dayEntries.length} 项 · 目标 {targets.kcal} kcal
+            </div>
+            <div className="mt-2 space-y-0.5">
+              {macros.map((m) => (
+                <div key={m.label} className="flex items-center gap-1.5 text-[11.5px]">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${m.dot}`} />
+                  <span className="text-ink-faint">{m.label}</span>
+                  <span className="tabular-nums text-ink-soft">
+                    {Math.round(m.value)} / {m.target} g
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
         {profile.nutritionOverride && (
           <div className="mt-2 text-[11.5px] text-warn">当前使用的是你手动修改过的目标，非自动计算值。</div>
@@ -267,34 +298,6 @@ export default function DietPage() {
           toast(count ? `已把 ${count} 种食材加入清单` : "当天还没有食材可生成", "ok");
         }}
       />
-    </div>
-  );
-}
-
-function Num({ label, v, max, unit }: { label: string; v: number; max: number; unit: string }) {
-  return (
-    <div>
-      <div className="text-[17px] font-semibold tabular-nums">
-        {v}
-        <span className="ml-0.5 text-[10px] font-normal text-ink-faint">{unit}</span>
-      </div>
-      <div className="text-[11px] text-ink-faint">
-        {label} / {max}
-        {unit}
-      </div>
-    </div>
-  );
-}
-
-function BarLine({ label, v, max, tone }: { label: string; v: number; max: number; tone?: "clay" }) {
-  const pct = max > 0 ? Math.round((v / max) * 100) : 0;
-  return (
-    <div>
-      <div className="mb-0.5 flex justify-between text-[11.5px] text-ink-faint">
-        <span>{label}</span>
-        <span>{pct}%</span>
-      </div>
-      <Bar value={v} max={max} tone={tone} />
     </div>
   );
 }
