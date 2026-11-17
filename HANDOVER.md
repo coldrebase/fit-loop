@@ -163,6 +163,17 @@ AUDIT-2026-10-20.md    上轮全面审计报告（60+ 处修复记录）
 
 工程已启用 `kotlin-android`；`minSdk` 因 Health Connect 提高到 **26**；依赖被钉在 `androidx.health.connect:connect-client:1.1.0-alpha07`（1.1.0 稳定版要求 AGP 8.9 + compileSdk 36，当前是 8.2 + 34）。
 
+
+### 版本口径（容易踩）
+
+| 位置 | 当前值 | 说明 |
+| --- | --- | --- |
+| `package.json` version | 0.5.0 | 仅标识代码版本 |
+| `android/app/build.gradle` versionCode / versionName | 5 / 0.5.0 | **Android 安装升级看这个**：versionCode 必须递增，否则装不上 |
+| 微信小程序 | 0.1.0（已上传测试号） | 正式发布时由 `upload:mp -v` 指定 |
+
+发新 APK 的固定动作：改 `versionCode +1`、`versionName` 同步、跑 `npm run build:apk`。
+
 ---
 
 ## 7. 构建环境（换机器时照着装）
