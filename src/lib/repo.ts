@@ -1,4 +1,12 @@
 import * as db from "./db";
+import {
+  BACKUP_STORES,
+  buildBackup,
+  describeImport,
+  parseBackup,
+  planMergeImport,
+  type BackupStore,
+} from "./backup";
 import { EXERCISES } from "./seed/exercises";
 import { FOODS } from "./seed/foods";
 import type { Exercise } from "./types";
@@ -336,13 +344,77 @@ export async function addWater(date: string, ml: number): Promise<void> {
 
 /* ============================ 导出 / 删除 / 演示 ============================ */
 
-export async function exportUserData(): Promise<Record<string, unknown[]>> {
-  const data = await db.exportAll();
+export async function exportUserData(): Promise<Record<string, unknown>> {
+  const { stores, meta } = await db.exportAllKeyed();
+  return buildBackup({
+    stores: stores as Record<BackupStore, unknown[]>,
+    meta,
+    schemaVersion: db.DB_VERSION,
+  });
+}
+
+export interface ImportSummary {
+  mode: "merge" | "replace";
+  added: number;
+  updated: number;
+  kept: number;
+  skipped: number;
+  warnings: string[];
+  /** 给用户看的一句话结果 */
+  message: string;
+}
+
+/**
+ * 从备份文件恢复。
+ * - merge（默认）：按 id 合并，本机有更新版本时保留本机，绝不回滚新数据；
+ * - replace：先清空再写入（破坏性，UI 必须二次确认）。
+ */
+export async function importUserData(
+  raw: string,
+  mode: "merge" | "replace",
+): Promise<ImportSummary> {
+  const parsed = parseBackup(raw);
+
+  if (mode === "replace") {
+    await db.clearStores([...BACKUP_STORES]);
+    let added = 0;
+    for (const s of BACKUP_STORES) {
+      const list = parsed.stores[s];
+      if (!list.length) continue;
+      await db.putMany(s as db.StoreName, list);
+      added += list.length;
+    }
+    for (const [k, v] of Object.entries(parsed.meta)) await db.putMetaEntry(k, v);
+    return {
+      mode,
+      added,
+      updated: 0,
+      kept: 0,
+      skipped: parsed.skipped,
+      warnings: parsed.warnings,
+      message: `已覆盖恢复：写入 ${added} 条${parsed.meta && Object.keys(parsed.meta).length ? `、${Object.keys(parsed.meta).length} 组自建数据` : ""}`,
+    };
+  }
+
+  const existing = await db.exportAllKeyed();
+  const plan = planMergeImport(parsed, {
+    stores: existing.stores as Record<BackupStore, unknown[]>,
+    meta: existing.meta,
+  });
+  for (const s of BACKUP_STORES) {
+    if (plan.stores[s].length) await db.putMany(s as db.StoreName, plan.stores[s]);
+  }
+  for (const [k, v] of Object.entries(plan.meta)) await db.putMetaEntry(k, v);
+
   return {
-    ...data,
-    exportedAt: [new Date().toISOString()],
-    note: ["本文件由 FitLoop 导出，包含你的个人档案、训练与饮食记录。"],
-  } as Record<string, unknown[]>;
+    mode,
+    added: plan.added,
+    updated: plan.updated,
+    kept: plan.kept,
+    skipped: parsed.skipped,
+    warnings: parsed.warnings,
+    message: describeImport(plan, parsed.skipped),
+  };
 }
 
 export async function wipeUserData(): Promise<void> {

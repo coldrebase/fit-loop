@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProvider";
+import { BackupRestore } from "@/components/BackupRestore";
 import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { notificationsSupported, syncReminders } from "@/lib/nativeNotify";
 import { VisionSettings } from "@/components/VisionSettings";
@@ -342,15 +343,19 @@ export default function MePage() {
         <div className="mb-2 text-[15px] font-medium">数据管理</div>
         <div className="mb-2 rounded-lg bg-paper px-2.5 py-2 text-[12px] leading-relaxed text-ink-soft">
           存储位置：
-          {persistence === "indexeddb" ? "浏览器 IndexedDB（本机）" : "内存（当前环境不支持 IndexedDB，刷新即丢失）"}
+          {persistence === "indexeddb"
+            ? "浏览器 IndexedDB（本机）"
+            : "内存模式（IndexedDB 不可用，刷新即丢失）"}
           。
           <span className="text-alert"> IndexedDB 不等于云备份</span>
-          —— 清理浏览器数据、卸载浏览器或换设备都会丢失，请定期导出。
+          —— 清理浏览器数据、卸载浏览器或换设备都会丢失。导出的 JSON 是唯一的跨设备备份，
+          换机后可以用下面的「从备份文件恢复」读回来。
         </div>
         <div className="space-y-2">
           <button className="btn-secondary w-full" onClick={() => void exportJson()}>
             导出我的数据（JSON）
           </button>
+          <BackupRestore />
           <button
             className="btn-secondary w-full"
             onClick={async () => {
@@ -479,14 +484,14 @@ export default function MePage() {
       <Confirm
         open={confirmWipe}
         title="删除全部个人数据？"
-        desc="档案、场馆、计划、训练与饮食记录都会被永久删除，无法恢复。建议先导出备份。"
-        confirmText="我确认，全部删除"
+        desc="档案、场馆、计划、训练与饮食记录都会被删除。删除前会自动下载一份备份文件到你的下载目录，之后可以用「从备份文件恢复」读回来——请确认那个文件真的下载成功。"
+        confirmText="我确认，先备份再全部删除"
         danger
         onCancel={() => setConfirmWipe(false)}
         onConfirm={async () => {
           await wipe();
           setConfirmWipe(false);
-          toast("已删除全部个人数据", "ok");
+          toast("已导出备份并删除全部个人数据", "ok");
         }}
       />
     </div>

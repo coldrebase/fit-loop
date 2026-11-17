@@ -35,6 +35,41 @@ function log(msg) {
 }
 
 let moved = false;
+
+/**
+ * 还原被临时搬走的 src/app/api。
+ * 构建中途被杀（Ctrl-C / CI 取消 / 断电）时也必须还原，
+ * 否则仓库里会留下「api 目录消失 + 一个 .static-api-backup」的半残状态，
+ * 下一次构建会静默导出一个没有 /api 的站点，而且 git status 全是删除。
+ */
+function restoreApi(dir, backup, quiet = false) {
+  if (!existsSync(backup)) return;
+  try {
+    if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
+    renameSync(backup, dir);
+    if (!quiet) log("还原 src/app/api");
+  } catch (e) {
+    console.error(`[static] 还原 src/app/api 失败：${e.message}；备份仍在 ${backup}`);
+  }
+}
+
+// 上一次运行死在了搬走之后：先把仓库复原，再开始本次构建。
+if (existsSync(backupDir)) {
+  log("发现上次构建残留的 .static-api-backup，先还原 src/app/api");
+  restoreApi(apiDir, backupDir);
+}
+
+for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
+  process.on(signal, () => {
+    if (moved) restoreApi(apiDir, backupDir);
+    process.exit(130);
+  });
+}
+// 兜底：next build 抛错走 finally，但进程直接退出时只能靠 exit 钩子
+process.on("exit", () => {
+  if (moved) restoreApi(apiDir, backupDir, true);
+});
+
 try {
   if (existsSync(apiDir)) {
     log(`把 ${apiDir} 临时移到 ${backupDir}`);
@@ -79,9 +114,8 @@ try {
   }
 } finally {
   if (moved) {
-    log("还原 src/app/api");
-    if (existsSync(apiDir)) rmSync(apiDir, { recursive: true, force: true });
-    renameSync(backupDir, apiDir);
+    restoreApi(apiDir, backupDir);
+    moved = false;
   }
 }
 

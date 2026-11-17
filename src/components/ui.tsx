@@ -426,10 +426,14 @@ export function ErrorBox({ text, onRetry }: { text: string; onRetry?: () => void
  */
 export function DataErrorBanner({
   message,
+  title = "本地数据读取异常",
+  hint = "部分记录可能未显示。可以重试，或检查浏览器存储权限 / 剩余空间。",
   onRetry,
   onDismiss,
 }: {
   message: string;
+  title?: string;
+  hint?: string;
   onRetry: () => void;
   onDismiss: () => void;
 }) {
@@ -441,8 +445,8 @@ export function DataErrorBanner({
     >
       <div className="pointer-events-auto mx-auto flex w-full max-w-[560px] items-start gap-2 rounded-xl2 border border-alert/30 bg-paper-card px-3 py-2.5 shadow-lift">
         <div className="min-w-0 flex-1 text-[12.5px] leading-relaxed">
-          <div className="font-medium text-alert">本地数据读取异常</div>
-          <div className="text-ink-soft">部分记录可能未显示。可以重试，或检查浏览器存储权限 / 剩余空间。</div>
+          <div className="font-medium text-alert">{title}</div>
+          <div className="text-ink-soft">{hint}</div>
           <div className="mt-0.5 truncate text-[11px] text-ink-faint" title={message}>
             {message}
           </div>

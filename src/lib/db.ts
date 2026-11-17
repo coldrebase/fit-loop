@@ -96,12 +96,48 @@ function getDB(): Promise<IDBPDatabase<FitLoopDB>> {
 
 /* ------------------------- 内存兜底（IndexedDB 不可用时） ------------------------- */
 
-type StoreName = Extract<keyof FitLoopDB, string>;
+export type StoreName = Extract<keyof FitLoopDB, string>;
 const memoryFallback = new Map<string, Map<string, any>>();
+/** 整库不可用（IndexedDB 打不开 / 读失败）：这时持久化确实降级为内存 */
 let usingFallback = false;
 
 export function isUsingFallback(): boolean {
   return usingFallback;
+}
+
+/* ------------------------------ 写入失败上报 ------------------------------ */
+/**
+ * 写失败（配额满 / 隐私模式 / DataError）以前是**静默**的：值只进内存 Map，
+ * 界面照样弹「已保存」，刷新后消失。这里把失败暴露出去，由 AppProvider 提示用户。
+ */
+let lastWriteError: string | null = null;
+const writeErrorListeners = new Set<(message: string) => void>();
+
+function reportWriteError(e: unknown): void {
+  const message = e instanceof Error ? e.message : String(e);
+  lastWriteError = message;
+  writeErrorListeners.forEach((fn) => {
+    try {
+      fn(message);
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+export function getLastWriteError(): string | null {
+  return lastWriteError;
+}
+
+export function clearLastWriteError(): void {
+  lastWriteError = null;
+}
+
+export function onWriteError(fn: (message: string) => void): () => void {
+  writeErrorListeners.add(fn);
+  return () => {
+    writeErrorListeners.delete(fn);
+  };
 }
 
 function memStore(name: StoreName) {
@@ -173,8 +209,9 @@ export async function put<T>(store: StoreName, value: T, key?: string): Promise<
     await db.put(store as any, value as any, key as any);
     // 成功落库后清掉同 key 的内存兜底，避免旧值覆盖新值。
     if (k !== undefined) memStore(store).delete(k);
-  } catch {
-    usingFallback = true;
+  } catch (e) {
+    // 写入失败：值留在内存里保证当前会话可见，但必须让上层知道没落库。
+    reportWriteError(e);
     memStore(store).set(k ?? "default", value);
   }
   notify();
@@ -189,8 +226,8 @@ export async function putMany<T>(store: StoreName, values: T[]): Promise<void> {
       const id = (v as { id?: string } | null)?.id;
       if (id !== undefined) memStore(store).delete(id);
     }
-  } catch {
-    usingFallback = true;
+  } catch (e) {
+    reportWriteError(e);
     for (const v of values) memStore(store).set((v as any)?.id ?? "default", v);
   }
   notify();
@@ -201,8 +238,8 @@ export async function remove(store: StoreName, key: string): Promise<void> {
     const db = await getDB();
     await db.delete(store as any, key);
     memStore(store).delete(key);
-  } catch {
-    usingFallback = true;
+  } catch (e) {
+    reportWriteError(e);
     memStore(store).delete(key);
   }
   notify();
@@ -234,51 +271,79 @@ export async function clearStore(store: StoreName): Promise<void> {
     const db = await getDB();
     await db.clear(store as any);
     memStore(store).clear();
-  } catch {
-    usingFallback = true;
+  } catch (e) {
+    reportWriteError(e);
     memStore(store).clear();
   }
   notify();
 }
 
-/** 导出全部个人数据（用于「导出我的数据」） */
+/** 所有 store（含 meta） */
+export const ALL_STORES: StoreName[] = [
+  "profile",
+  "venues",
+  "plans",
+  "sessions",
+  "foods",
+  "foodEntries",
+  "mealPlans",
+  "shopping",
+  "recovery",
+  "bodyWeights",
+  "water",
+  "meta",
+];
+
+/**
+ * 导出全部数据，并且**保留 meta store 的 key**。
+ * 旧 exportAll 用 getAll("meta") 只拿到值、丢了 key，导致自定义动作这类
+ * 存在 meta 里的数据导出后无法还原 —— 备份等于半残。
+ */
+export async function exportAllKeyed(): Promise<{
+  stores: Record<string, unknown[]>;
+  meta: Record<string, unknown>;
+}> {
+  const stores: Record<string, unknown[]> = {};
+  for (const n of ALL_STORES) {
+    if (n === "meta") continue;
+    stores[n] = await getAll(n);
+  }
+
+  const meta: Record<string, unknown> = {};
+  try {
+    const db = await getDB();
+    const keys = await db.getAllKeys("meta");
+    const values = (await db.getAll("meta")) as unknown[];
+    keys.forEach((k, i) => {
+      meta[String(k)] = values[i];
+    });
+  } catch {
+    /* 整库不可用时下面用内存兜底 */
+  }
+  for (const [k, v] of memStore("meta")) meta[k] = v;
+  return { stores, meta };
+}
+
+/** 清空指定 store（用于「覆盖式恢复」） */
+export async function clearStores(names: string[]): Promise<void> {
+  for (const n of names) await clearStore(n as StoreName);
+}
+
+/** 逐条写入，保持原有 API 语义（每条失败都会被上报，但不会中断整批） */
+export async function putMetaEntry(key: string, value: unknown): Promise<void> {
+  await put("meta", value, key);
+}
+
+/** 导出全部个人数据（旧接口，meta 的 key 会丢；新代码请用 exportAllKeyed） */
 export async function exportAll(): Promise<Record<string, unknown[]>> {
-  const names: StoreName[] = [
-    "profile",
-    "venues",
-    "plans",
-    "sessions",
-    "foods",
-    "foodEntries",
-    "mealPlans",
-    "shopping",
-    "recovery",
-    "bodyWeights",
-    "water",
-    "meta",
-  ];
   const out: Record<string, unknown[]> = {};
-  for (const n of names) out[n] = await getAll(n);
+  for (const n of ALL_STORES) out[n] = await getAll(n);
   return out;
 }
 
 /** 删除全部个人数据 */
 export async function wipeAll(): Promise<void> {
-  const names: StoreName[] = [
-    "profile",
-    "venues",
-    "plans",
-    "sessions",
-    "foods",
-    "foodEntries",
-    "mealPlans",
-    "shopping",
-    "recovery",
-    "bodyWeights",
-    "water",
-    "meta",
-  ];
-  for (const n of names) await clearStore(n);
+  for (const n of ALL_STORES) await clearStore(n);
 }
 
 /* --------------------------------- 变更通知 -------------------------------- */

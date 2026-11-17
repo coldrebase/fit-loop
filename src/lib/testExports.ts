@@ -14,3 +14,4 @@ export * from "./seed/exercises";
 export * from "./seed/foods";
 export * from "./seed/muscles";
 export * from "./healthImport";
+export * from "./backup";
