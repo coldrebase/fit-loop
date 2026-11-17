@@ -3,6 +3,9 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 版本号与 `package.json`、`android/app/build.gradle` 的 `versionCode` 对齐，规则见 `HANDOVER.md` 的「版本口径」一节。
 
+## [0.7.1] · 2026-11-17
+- 修复：休息日时「今天还没做」仍列出「今天休息，不用练 / 去完成」的自相矛盾
+
 ## [0.7.0] · 2026-11-17（首页改版，网页 + App 同步）
 
 ### 首页（今日）改成仪表盘

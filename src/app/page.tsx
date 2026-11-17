@@ -122,13 +122,12 @@ export default function TodayPage() {
   const remaining: { key: string; text: string; href: string }[] = [];
   if (inProgress) {
     remaining.push({ key: "train", text: `训练没做完：${inProgress.title}`, href: "/train" });
-  } else if (trainedToday === 0 && (todayDay || activePlan)) {
-    remaining.push({
-      key: "train",
-      text: todayDay ? `还没练：${todayDay.title}` : "今天休息，不用练",
-      href: "/train",
-    });
+  } else if (todayDay && trainedToday === 0) {
+    remaining.push({ key: "train", text: `还没练：${todayDay.title}`, href: "/train" });
+  } else if (!activePlan) {
+    remaining.push({ key: "train", text: "还没有训练计划", href: "/train" });
   }
+  // 休息日不往「还没做」里塞条目：训练卡已经说明了，列出来反而自相矛盾
   if (todayEntries.length === 0) {
     remaining.push({ key: "eat", text: "还没记录今天的饮食", href: "/diet" });
   }
