@@ -1,6 +1,6 @@
 {
   "name": "fit-loop",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "private": true,
   "description": "FitLoop · 训练 / 饮食 / 复盘一体化的移动端优先健身管理应用（本地优先，无后端可用）",
   "scripts": {
