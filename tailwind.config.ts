@@ -30,6 +30,11 @@ const config: Config = {
         },
         alert: c("c-alert"),
         warn: c("c-warn"),
+        macro: {
+          protein: c("c-macro-protein"),
+          carb: c("c-macro-carb"),
+          fat: c("c-macro-fat"),
+        },
       },
       fontFamily: {
         sans: [

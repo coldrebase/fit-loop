@@ -7,6 +7,7 @@ import { InstallHint } from "@/components/InstallHint";
 import { Mascot } from "@/components/Mascot";
 import { PwaBoot } from "@/components/PwaBoot";
 import { ThemeBoot } from "@/components/ThemeBoot";
+import { TopBar } from "@/components/TopBar";
 import { ToastHost } from "@/components/ui";
 
 /** 静态导出部署在子路径（如 GitHub Pages 的 /fit-loop）时由构建脚本注入 */
@@ -16,8 +17,11 @@ const TITLE = "FitLoop · 训练与饮食记录";
 const DESC =
   "学习动作、制定计划、执行训练、管理饮食、复盘调整的移动端优先健身管理应用（本地优先，数据保存在你的浏览器）。";
 
-/** 在首帧渲染前应用主题，避免深色用户看到白色闪烁 */
-const THEME_BOOT = `try{var m=localStorage.getItem("fitloop-mode");document.documentElement.dataset.theme=(m==="dark")?"dark":"mint";}catch(e){document.documentElement.dataset.theme="mint";}`;
+/**
+ * 在首帧渲染前应用主题，避免深色用户看到白色闪烁。
+ * 与 components/ThemeBoot.tsx 的 applyMode 保持一致：auto 跟随系统，夜间用 night。
+ */
+const THEME_BOOT = `try{var m=localStorage.getItem("fitloop-mode");if(m!=="light"&&m!=="dark")m="auto";if(m==="auto")m=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=(m==="dark")?"night":"mint";}catch(e){document.documentElement.dataset.theme="mint";}`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -54,7 +58,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ECFAF6" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0C0E" },
+    { media: "(prefers-color-scheme: dark)", color: "#201C30" },
   ],
 };
 
@@ -65,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 首帧前定主题，避免深色模式白闪 */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
 
-        {/* 首屏启动图：纯内联样式，JS 未加载也不会白屏 */}
+        {/* 首屏启动图：纯内联样式，JS 未加载也不会白屏；底色跟随主题变量，夜间不闪白 */}
         <div
           id="boot-splash"
           style={{
@@ -75,16 +79,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#ECFAF6",
+            background: "rgb(var(--c-bg))",
             transition: "opacity .3s ease",
           }}
           aria-hidden="true"
         >
-          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-            <circle cx="48" cy="48" r="6" fill="#2DB39C" />
-            <rect x="20" y="42" width="56" height="12" rx="6" fill="#2DB39C" />
-            <rect x="8" y="26" width="12" height="44" rx="4" fill="#2DB39C" />
-            <rect x="76" y="26" width="12" height="44" rx="4" fill="#2DB39C" />
+          <svg
+            width="96"
+            height="96"
+            viewBox="0 0 96 96"
+            fill="none"
+            aria-hidden="true"
+            style={{ color: "rgb(var(--c-accent-600))" }}
+          >
+            <circle cx="48" cy="48" r="6" fill="currentColor" />
+            <rect x="20" y="42" width="56" height="12" rx="6" fill="currentColor" />
+            <rect x="8" y="26" width="12" height="44" rx="4" fill="currentColor" />
+            <rect x="76" y="26" width="12" height="44" rx="4" fill="currentColor" />
           </svg>
         </div>
 
@@ -93,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PwaBoot />
         <AppProvider>
           <div className="mx-auto flex min-h-screen w-full max-w-[560px] flex-col bg-paper">
+            <TopBar />
             <main className="flex-1 pb-24">{children}</main>
             <BottomNav />
           </div>

@@ -32,20 +32,10 @@ const ITEMS = [
   },
   {
     href: "/progress",
-    label: "进展",
+    label: "数据",
     icon: (
       <>
         <path d="M4 19h16M6 19V9M11 19V5M16 19v-6" strokeWidth="1.6" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
-    href: "/me",
-    label: "我的",
-    icon: (
-      <>
-        <circle cx="12" cy="8.5" r="3.4" strokeWidth="1.6" />
-        <path d="M5 20c1.2-3.4 3.9-5 7-5s5.8 1.6 7 5" strokeWidth="1.6" strokeLinecap="round" />
       </>
     ),
   },

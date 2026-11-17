@@ -94,7 +94,9 @@
   --c-clay-600: 206 118 62;
   --c-alert: 198 78 76;
   --c-warn: 160 110 18;
-  --c-on-accent: 255 255 255;
+  /* 薄荷主色 #2DB39C 上的文字：白字只有 2.61:1（WCAG AA 需 4.5:1），
+   * 改用近墨绿 #0F3B34 = 4.7:1。其余主题的强调色更暗，仍用白字。 */
+  --c-on-accent: 15 59 52;
   --r-lg: 20px;
   --r-xl: 24px;
   --r-xl2: 30px;
@@ -325,6 +327,28 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* ===========================================================================
+ * 宏量营养素三色（今日页热量环外圈 / 图例）
+ * ---------------------------------------------------------------------------
+ * 单独成一组变量而不是直接复用 accent/clay：深色主题下原有强调色全是暖橙，
+ * 三种营养素挤成同一色系就分不出来了，这里给每种主题挑一组能互相区分的颜色。
+ * ========================================================================= */
+:root {
+  --c-macro-protein: 224 129 85;
+  --c-macro-carb: 60 150 135;
+  --c-macro-fat: 176 120 20;
+}
+[data-theme="mint"] {
+  --c-macro-protein: 249 164 104;
+  --c-macro-carb: 45 179 156;
+  --c-macro-fat: 160 110 18;
+}
+[data-theme="night"] {
+  --c-macro-protein: 255 176 138;
+  --c-macro-carb: 130 214 196;
+  --c-macro-fat: 250 205 120;
+}
+
 @layer base {
   html,
   body {
@@ -337,8 +361,17 @@
     font-size: 15px;
     line-height: 1.6;
   }
-  * {
-    -webkit-touch-callout: none;
+  /* 键盘 / 桌面用户必须能看到焦点落在哪：统一 2px 强调色外环。
+   * （原先全局 -webkit-touch-callout: none 已撤掉，长按可以复制食物名/数值。） */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-accent-600));
+    outline-offset: 2px;
+  }
+  /* 输入框自带 focus 边框高亮，外环收紧 1px，避免叠加后发虚 */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline-offset: 1px;
   }
   input,
   select,

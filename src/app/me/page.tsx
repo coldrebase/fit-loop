@@ -6,7 +6,7 @@ import { useApp } from "@/components/AppProvider";
 import { INSTALLABLE_EVENT, promptInstall } from "@/components/PwaBoot";
 import { notificationsSupported, syncReminders } from "@/lib/nativeNotify";
 import { VisionSettings } from "@/components/VisionSettings";
-import { useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
+import { MODE_LABEL, useThemeMode, type ThemeMode } from "@/components/ThemeBoot";
 import { Chip, Confirm, Loading, Segmented, Sheet, Stepper, toast } from "@/components/ui";
 import { GOAL_LABEL, LEVEL_LABEL, MOVEMENT_PATTERN_LABEL, EQUIPMENT_LABEL } from "@/lib/plan/engine";
 import { targetsFor } from "@/lib/nutrition";
@@ -242,18 +242,19 @@ export default function MePage() {
       <div className="card">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[15px] font-medium">外观</span>
-          <span className="text-[12px] text-ink-faint">{mode === "dark" ? "夜间模式" : "日间模式"}</span>
+          <span className="text-[12px] text-ink-faint">{MODE_LABEL[mode]}</span>
         </div>
         <Segmented<ThemeMode>
           value={mode}
           onChange={setMode}
           options={[
+            { value: "auto", label: "跟随系统" },
             { value: "light", label: "日间" },
             { value: "dark", label: "夜间" },
           ]}
         />
-        <div className="mt-1.5 text-[11.5px] text-ink-faint">
-          夜间模式为深色背景，适合暗光环境。选择保存在本机，立即生效。
+        <div className="mt-1.5 text-[11.5px] leading-relaxed text-ink-faint">
+          日间是薄荷配色，夜间是夜空小狐配色。选「跟随系统」时，会随手机的深色模式自动切换；选择保存在本机，立即生效。
         </div>
       </div>
 
