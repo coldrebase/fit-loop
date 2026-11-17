@@ -369,7 +369,7 @@ export default function TrainPage() {
               onToggle={(id) => setSelMuscle(id === selMuscle ? null : id)}
             />
             <div className="mt-1 text-center text-[11.5px] text-ink-faint">
-              示意图形状用于快速定位，非解剖学精确插图；点击肌群查看相关动作
+              每条肌肉都有自己的轮廓，点击可高亮并查看相关动作；轮廓为简化示意，不是医学解剖图。
             </div>
           </div>
           <div>
